@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+  	<servlet>
+    	<servlet-name>Home</servlet-name>
+    	<servlet-class>br.com.betohayasida.tos.controller.Home</servlet-class>
+	</servlet>
+	<servlet-mapping>
+    	<servlet-name>Home</servlet-name>
+    	<url-pattern>/about</url-pattern>
+  	</servlet-mapping>
+	<servlet-mapping>
+    	<servlet-name>Home</servlet-name>
+    	<url-pattern>/contact</url-pattern>
+  	</servlet-mapping>
+  
+  	<servlet>
+	    <servlet-name>ToS</servlet-name>
+	    <servlet-class>br.com.betohayasida.tos.controller.ToS</servlet-class>
+  	</servlet>
+  	<servlet-mapping>
+	    <servlet-name>ToS</servlet-name>
+	    <url-pattern>/</url-pattern>
+  	</servlet-mapping>
+	<servlet-mapping>
+    	<servlet-name>ToS</servlet-name>
+    	<url-pattern>/msearch/*</url-pattern>
+  	</servlet-mapping>
+  	<servlet-mapping>
+	    <servlet-name>ToS</servlet-name>
+	    <url-pattern>/search/*</url-pattern>
+  	</servlet-mapping>
+  	<servlet-mapping>
+	    <servlet-name>ToS</servlet-name>
+	    <url-pattern>/tos/*</url-pattern>
+  	</servlet-mapping>
+  	<servlet-mapping>
+	    <servlet-name>ToS</servlet-name>
+	    <url-pattern>/archive/*</url-pattern>
+  	</servlet-mapping>
+  
+   	<servlet>  
+		<servlet-name>Common</servlet-name>  
+		<servlet-class>br.com.betohayasida.tos.controller.Common</servlet-class>  
+    </servlet>  
+	<servlet-mapping>  
+        <servlet-name>Common</servlet-name>  
+        <url-pattern>/resources/*</url-pattern>  
+    </servlet-mapping>  
+
+</web-app>

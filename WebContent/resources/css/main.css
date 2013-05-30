@@ -1,0 +1,7 @@
+.tosbox{
+	height: 400px;
+	overflow-y: auto; 
+}
+.clear{
+	clear:both;
+}
