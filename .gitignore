@@ -4,3 +4,10 @@
 *.jar
 *.war
 *.ear
+/.settings
+/.classpath
+*.DS_Store
+/.project
+/list.txt
+/commons-validator-1.4.0
+/bin
