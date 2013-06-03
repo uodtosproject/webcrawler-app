@@ -145,7 +145,7 @@ public class Crawler {
 								tos.setUrl(url.toString());
 								tos.setSource(file.html());
 								tos.setText(tpros.clean(page));
-								
+								tpros.process(page);
 								store.insert(tos);
 								tos = store.read(originUrl);
 								//store.list();

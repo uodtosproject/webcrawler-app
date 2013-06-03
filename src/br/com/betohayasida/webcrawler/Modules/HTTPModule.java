@@ -71,9 +71,11 @@ public class HTTPModule {
 			}
 			
 		}
-		code.setCode(Integer.parseInt(header.split(" ")[1]));
-		if(code.getCode() == 302 || code.getCode() == 301){
-			code.setArg(connection.getHeaderField("location"));
+		if(valid){
+			code.setCode(Integer.parseInt(header.split(" ")[1]));
+			if(code.getCode() == 302 || code.getCode() == 301){
+				code.setArg(connection.getHeaderField("location"));
+			}
 		}
 		/*if(valid){
 			Set<String> list = connection.getHeaderFields().keySet();

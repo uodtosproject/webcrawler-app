@@ -2,7 +2,9 @@ package br.com.betohayasida.webcrawler.Modules;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.safety.Whitelist;
+import org.jsoup.select.Elements;
 
 public class TextProcessingModule {
 	
@@ -21,5 +23,16 @@ public class TextProcessingModule {
 		
 		return cleaned;
 	}
-
+	
+	public String process(Document page){
+		String processed = new String();
+		Elements elems = page.getAllElements();
+		for(Element item : elems){
+			if(item.text().contains("death")){
+				System.out.println(item.html());
+				System.out.println();
+			}
+		}
+		return processed;
+	}
 }
