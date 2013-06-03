@@ -22,6 +22,7 @@ public class URLModule {
 		URL url = null;
 		
 		// Canonicalise the URL
+		
 		String cUrl = this.canonicalise(sUrl);
 		
 		// Check if it's valid
@@ -60,9 +61,7 @@ public class URLModule {
 	 * @return String with canonicalised URL
 	 */
 	private String canonicalise(String URL){
-		String cURL = null;
-		// Convert to lowercase
-		cURL = URL.toLowerCase();
+		String cURL = URL;
 		
 		// Remove anchors
 		if(cURL.contains("#")){
@@ -101,6 +100,29 @@ public class URLModule {
 		else if(cURL.contains("http://www.google.co.uk/intl/en/policies/terms/")){
 			cURL = cURL.replace("http://www.google.co.uk/intl/en/policies/terms/", "http://www.google.com/intl/en/policies/terms/");
 		}
+		else if(cURL.equalsIgnoreCase("https://accounts.google.com/tos?hl=en")){
+			cURL = "http://www.google.co.uk/intl/en/policies/terms/regional.html";
+		}
+		
+		// Convert to lowercase
+		String[] strips = cURL.split("//");
+		if(strips.length > 2){
+			String[] strips2 = strips[1].split("/");
+			cURL = strips[0].concat("//" + strips2[0].toLowerCase() + "/");
+			int size = strips2.length - 1;
+			int i = 0;
+			for(i = 1; i <= size; i++){
+				cURL = cURL.concat(strips2[i]);
+			}
+			if(strips.length >= 3){
+				size = strips.length;
+				for(i = 2; i < size; i++){
+					cURL = cURL.concat("//" + strips[i]);
+				}
+			}
+		}
+		
+		//System.out.println(cURL);
 		return cURL;
 	}
 	

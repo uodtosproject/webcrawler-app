@@ -70,6 +70,11 @@ public class ToSStore {
 		this.retrievedOn = retrievedOn;
 	}
 	
+	/**
+	 * 
+	 * @param response
+	 * @param archive
+	 */
 	public void printToXML(HttpServletResponse response, boolean archive){
 		response.setContentType("text/xml;charset=UTF-8");
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();

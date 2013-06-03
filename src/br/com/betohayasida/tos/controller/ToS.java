@@ -34,7 +34,7 @@ public class ToS extends HttpServlet {
 			if(URIparts[2].equalsIgnoreCase("msearch")){
 		    	StorageModule store = new StorageModule();
 		    	store.connect();
-		    	List<ToSStore> last = store.last(5);
+		    	List<ToSStore> last = store.last(15);
 			    RequestDispatcher rd=request.getRequestDispatcher("/WEB-INF/view/tos_multi.jsp");
 				request.setAttribute("last", last);
 				request.setAttribute("active", "msearch");
@@ -242,7 +242,7 @@ public class ToS extends HttpServlet {
 	protected void redirectHome(HttpServletRequest request, HttpServletResponse response, String alertTitle, String alertText) throws ServletException, IOException{
     	StorageModule store = new StorageModule();
     	store.connect();
-    	List<ToSStore> last = store.last(5);
+    	List<ToSStore> last = store.last(15);
 	    RequestDispatcher rd=request.getRequestDispatcher("/WEB-INF/view/tos_search.jsp");
 		request.setAttribute("last", last);
 		request.setAttribute("alertText", alertText);

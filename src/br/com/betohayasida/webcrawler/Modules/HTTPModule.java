@@ -1,15 +1,9 @@
 package br.com.betohayasida.webcrawler.Modules;
 import java.net.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.io.*;
 
 import br.com.betohayasida.webcrawler.Exceptions.DownloadException;
+import br.com.betohayasida.webcrawler.Store.ErrorStore;
 import br.com.betohayasida.webcrawler.Store.HTMLPage;
 
 /**
@@ -56,7 +50,7 @@ public class HTTPModule {
 	 * @param url URL of the page
 	 * @return True if the URL leads to a valid page
 	 */
-	public boolean checkHeaders(URL url){
+	public boolean checkHeaders(URL url, ErrorStore code){
         HttpURLConnection.setFollowRedirects(false);
         HttpURLConnection connection = null;
         boolean valid = false;
@@ -77,8 +71,11 @@ public class HTTPModule {
 			}
 			
 		}
-
-		if(valid){
+		code.setCode(Integer.parseInt(header.split(" ")[1]));
+		if(code.getCode() == 302 || code.getCode() == 301){
+			code.setArg(connection.getHeaderField("location"));
+		}
+		/*if(valid){
 			Set<String> list = connection.getHeaderFields().keySet();
 			Map<String,List<String>> headerF = connection.getHeaderFields();
 	        for(String item : list){
@@ -91,7 +88,7 @@ public class HTTPModule {
 		    System.out.println("Last Modified: " + dateFormat.format(c.getTime()));
 		} else {
 			System.out.println("Invalid URL");
-		}
+		}*/
 
         return valid;
     }

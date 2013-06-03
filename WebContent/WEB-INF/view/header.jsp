@@ -10,6 +10,11 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
         <link rel="stylesheet" href="<%= request.getContextPath()%>/resources/css/bootstrap.min.css">
+        
+		<link rel="shortcut icon" href="<%= request.getContextPath()%>/resources/favicon.ico">
+		<link rel="apple-touch-icon" href="<%= request.getContextPath()%>/resources/apple-touch-icon.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="<%= request.getContextPath()%>/resources/apple-touch-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="<%= request.getContextPath()%>/resources/apple-touch-icon-114x114.png">
         <style>
             body {
                 padding-top: 60px;
