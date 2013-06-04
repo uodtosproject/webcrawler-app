@@ -14,24 +14,23 @@ public class MongoBase {
 	protected MongoClient mongoClient = null;
 	protected DBCollection collection = null;
 	protected DB db = null;
-	protected String DBNAME = "default";
-	protected String COLLECTIONNAME = "default";
 	
 	/**
 	 * Connect to the DB.
 	 * @param name DB's name
 	 */
-	public boolean connect(){
+	public boolean connect(String DBNAME, String COLLECTIONNAME){
 		boolean connected = false;
 		
 		try {
 			mongoClient = new MongoClient();
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			System.out.println("The DB is offline");
 		}
 		if(mongoClient != null){
-			db = mongoClient.getDB(this.DBNAME);
-			collection = db.getCollection(this.COLLECTIONNAME);
+			db = mongoClient.getDB(DBNAME);
+			collection = db.getCollection(COLLECTIONNAME);
 			
 			if(collection != null){
 				connected = true;

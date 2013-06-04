@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import br.com.betohayasida.webcrawler.Store.Page;
-
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -25,11 +23,17 @@ import org.w3c.dom.Element;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import br.com.betohayasida.webcrawler.Modules.ArchiveStorage;
+import br.com.betohayasida.webcrawler.Modules.SiteStorage;
+
+
 public class TOS {
-	private String name;
-	private String url;
+	private String name = null;
+	private String url = null;
 	private List<Page> pages = new ArrayList<Page>();
-	private String visitedOn;
+	private String visitedOn = null;
+	private static SiteStorage siteStorage = new SiteStorage();
+	private static ArchiveStorage archive = new ArchiveStorage();
 	
 	public String getName() {
 		return name;
@@ -44,6 +48,7 @@ public class TOS {
 	public void setUrl(String url) {
 		this.url = url;
 	}
+	
 	public void addPage(Page page){
 		this.pages.add(page);
 	}
@@ -64,6 +69,10 @@ public class TOS {
 			this.pages.add(p);
 		}
 	}
+	public void dropPages(){
+		this.pages.clear();
+	}
+	
 	public String getVisitedOn() {
 		Date expiry = new Date(Long.parseLong(visitedOn));
 		return expiry.toString();
@@ -75,6 +84,17 @@ public class TOS {
 		this.visitedOn = visitedOn;
 	}
 	
+	public static TOS loadByURL(String url){
+		return siteStorage.readURL(url);
+	}
+	
+	public void save(){
+		siteStorage.insert(this);
+	}
+	
+	public void archive(){
+		archive.insert(this);
+	}
 	/**
 	 * 
 	 * @param response

@@ -108,14 +108,15 @@ public class Analist {
 				text.contains("delete") ||
 				text.contains("help") ||
 				text.contains("memorializing") ||
-				text.contains("policy") ||
+				text.contains("polic") ||
 				text.contains("privacy") ||
 				text.contains("termination") ||
 				text.contains("terms") ||
 				text.contains("terms of use") ||
 				text.contains("terms of service") ||
 				text.contains("tos") ||
-				text.contains("user agreement")
+				text.contains("user agreement") ||
+				text.contains("violation")
 				);
 		
 	}

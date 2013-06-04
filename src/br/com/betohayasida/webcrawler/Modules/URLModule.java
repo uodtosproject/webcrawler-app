@@ -115,11 +115,10 @@ public class URLModule {
 				}
 			}
 			
-			// Twitter-fix
+			// Twitter-fix 
 			if(cURL.contains("www.twitter")){
 				cURL = cURL.replace("www.twitter", "twitter");
 			} 
-			
 			// Foursquare-fix
 			else if(cURL.contains("www.foursquare")){
 				cURL = cURL.replace("www.foursquare", "foursquare");

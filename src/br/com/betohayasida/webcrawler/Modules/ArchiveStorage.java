@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.betohayasida.webcrawler.Store.Page;
+import br.com.betohayasida.webcrawler.Store.TOS;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
@@ -15,6 +16,10 @@ import com.mongodb.DBObject;
 public class ArchiveStorage extends MongoBase{
 	public String DBNAME = "crawler";
 	public String COLLECTIONNAME = "archive";
+
+	public boolean connect(){
+		return super.connect(DBNAME, COLLECTIONNAME);
+	}
 	
 	/**
 	 * Insert a document in the DB.
@@ -23,14 +28,26 @@ public class ArchiveStorage extends MongoBase{
 	 * @param originUrl The URL of the website.
 	 * @param page An HTMLPage object containing the source code.
 	 */
-	public void insert(Page page, String parentName){
-		BasicDBObject doc = new BasicDBObject("parentName", parentName).
-				append("url", page.getUrl()).
-                append("source", page.getSource()).
-                append("text", page.getText()).
-                append("retrievedOn", page.getRetrievedOnMili());
-		collection.insert(doc);
-		
+	public void insert(TOS tos){
+		if(this.connect()){
+			BasicDBObject doc = new BasicDBObject("name", tos.getName()).
+	                append("url", tos.getUrl()).
+	                append("visitedOn", String.valueOf(System.currentTimeMillis()));
+			
+			BasicDBObject psdoc = new BasicDBObject();
+			int i = 1;
+			List<Page> pages = tos.getPages();
+			for(Page page : pages){
+				psdoc.append(String.valueOf(i++), new BasicDBObject("url", page.getUrl()).
+	                append("source", page.getSource()).
+	                append("text", page.getText()).
+	                append("retrievedOn", String.valueOf(System.currentTimeMillis())));
+			}
+	
+			doc.append("pages", psdoc);
+			collection.insert(doc);
+			this.close();
+		}
 	}
 	
 	/**
@@ -38,26 +55,47 @@ public class ArchiveStorage extends MongoBase{
 	 * @param url The URL of the page
 	 * @return An String containing the source code of the page.
 	 */
-	public Page read(String url, long retrievedOn){
-		Page page = null;
-		BasicDBObject query = new BasicDBObject("url", url).append("retrievedOn", retrievedOn);
-		DBCursor cursor = collection.find(query);
+	public TOS read(String name, long retrievedOn){
+		TOS tos = null;
 		
-		try {
-			while(cursor.hasNext()) {
-				DBObject result = cursor.next();
-				page = new Page();
-				page.setParentName((String) result.get("parentName"));
-				page.setUrl((String) result.get("url"));
-				page.setSource((String) result.get("source"));
-				page.setText((String) result.get("text"));
-				page.setRetrievedOn((String) result.get("retrievedOn"));
+		if(this.connect()){
+			BasicDBObject query = new BasicDBObject("name", name).append("retrievedOn", String.valueOf(retrievedOn));
+			DBCursor cursor = collection.find(query);
+			
+			try {
+				
+				while(cursor.hasNext()) {
+					DBObject result = cursor.next();
+					
+					tos = new TOS();
+					tos.setName((String) result.get("name"));
+					tos.setUrl((String) result.get("url"));
+					tos.setVisitedOn((String) result.get("visitedOn"));
+					
+					BasicDBObject pages = (BasicDBObject) result.get("pages");
+					int size = pages.size();
+					int i;
+					for(i = 1; i <= size; i++){
+						
+						BasicDBObject pageDBObj = (BasicDBObject) pages.get(String.valueOf(i));
+						Page page = new Page();
+						page.setParentName((String) pageDBObj.get("parentName"));
+						page.setRetrievedOn((String) pageDBObj.get("retrievedOn"));
+						page.setSource((String) pageDBObj.get("source"));
+						page.setText((String) pageDBObj.get("text"));
+						page.setUrl((String) pageDBObj.get("url"));
+						tos.addPage(page);
+						
+					}
+					
+				}
+				
+			} finally {
+				cursor.close();
 			}
-		} finally {
-			cursor.close();
+			this.close();
 		}
-		
-		return page;
+		return tos;
 	}	
 	
 	/**
@@ -65,28 +103,49 @@ public class ArchiveStorage extends MongoBase{
 	 * @param url The URL of the page
 	 * @return An String containing the source code of the page.
 	 */
-	public List<Page> readAll(String url){
-		List<Page> pages = new ArrayList<Page>();
-		BasicDBObject query = new BasicDBObject("url", url);
-		DBCursor cursor = collection.find(query);
-		Page page;
+	public List<TOS> readAll(String name){
+		List<TOS> results = new ArrayList<TOS>();
 		
-		try {
-			while(cursor.hasNext()) {
-				DBObject result = cursor.next();
-				page = new Page();
-				page.setParentName((String) result.get("parentName"));
-				page.setUrl((String) result.get("url"));
-				page.setSource((String) result.get("source"));
-				page.setText((String) result.get("text"));
-				page.setRetrievedOn((String) result.get("retrievedOn"));
-				pages.add(page);
+		if(this.connect()){
+			BasicDBObject query = new BasicDBObject("name", name);
+			DBCursor cursor = collection.find(query);
+			
+			try {
+				
+				while(cursor.hasNext()) {
+					DBObject result = cursor.next();
+					
+					TOS tos = new TOS();
+					tos.setName((String) result.get("name"));
+					tos.setUrl((String) result.get("url"));
+					tos.setVisitedOn((String) result.get("visitedOn"));
+					
+					BasicDBObject pages = (BasicDBObject) result.get("pages");
+					int size = pages.size();
+					int i;
+					for(i = 1; i <= size; i++){
+						
+						BasicDBObject pageDBObj = (BasicDBObject) pages.get(String.valueOf(i));
+						Page page = new Page();
+						page.setParentName((String) pageDBObj.get("parentName"));
+						page.setRetrievedOn((String) pageDBObj.get("retrievedOn"));
+						page.setSource((String) pageDBObj.get("source"));
+						page.setText((String) pageDBObj.get("text"));
+						page.setUrl((String) pageDBObj.get("url"));
+						tos.addPage(page);
+						
+					}
+					results.add(tos);
+					
+				}
+				
+			} finally {
+				cursor.close();
 			}
-		} finally {
-			cursor.close();
+			this.close();
+			
 		}
-		
-		return pages;
+		return results;
 	}	
 	
 }
