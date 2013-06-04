@@ -214,6 +214,8 @@ public class Crawler {
 			
 		} // END Connect to DB
 		
+		siteStore.close();
+		
 		return tos;
 		
 	}

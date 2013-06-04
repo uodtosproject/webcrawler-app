@@ -4,12 +4,10 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.com.betohayasida.webcrawler.Store.TOS;
 import br.com.betohayasida.webcrawler.Store.Page;
+import br.com.betohayasida.webcrawler.Store.TOS;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
@@ -17,10 +15,7 @@ import com.mongodb.MongoClient;
 /**
  * Module responsible for handling the connection with the DB.
  */
-public class SiteStorage {
-	private MongoClient mongoClient = null;
-	private DBCollection collection = null;
-	private DB db = null;
+public class SiteStorage extends MongoBase {
 	private PageStorage pageStorage = new PageStorage();
 	public String DBNAME = "crawler";
 	public String COLLECTIONNAME = "websites";
@@ -47,14 +42,6 @@ public class SiteStorage {
 		}
 		
 		return connected;
-	}
-	
-	/**
-	 * Returns the DBCollection
-	 * @return DBCollection object
-	 */
-	public DBCollection collection(){
-		return this.collection;
 	}
 	
 	/**

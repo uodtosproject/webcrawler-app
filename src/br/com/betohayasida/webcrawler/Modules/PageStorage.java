@@ -1,59 +1,20 @@
 package br.com.betohayasida.webcrawler.Modules;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 import br.com.betohayasida.webcrawler.Store.Page;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
 
 /**
  * Module responsible for handling the connection with the DB.
  */
-public class PageStorage {
-	private MongoClient mongoClient = null;
-	private DBCollection collection = null;
-	private DB db = null;
+public class PageStorage extends MongoBase {
 	public String DBNAME = "crawler";
 	public String COLLECTIONNAME = "pages";
-	
-	/**
-	 * Connect to the DB.
-	 * @param name DB's name
-	 */
-	public boolean connect(){
-		boolean connected = false;
-		
-		try {
-			mongoClient = new MongoClient();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
-		if(mongoClient != null){
-			db = mongoClient.getDB(this.DBNAME);
-			collection = db.getCollection(this.COLLECTIONNAME);
-			
-			if(collection != null){
-				connected = true;
-			}
-		}
-		
-		return connected;
-	}
-	
-	/**
-	 * Returns the DBCollection
-	 * @return DBCollection object
-	 */
-	public DBCollection collection(){
-		return this.collection;
-	}
 	
 	/**
 	 * Insert a document in the DB.
