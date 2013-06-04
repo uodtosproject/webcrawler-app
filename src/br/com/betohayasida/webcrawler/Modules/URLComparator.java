@@ -2,15 +2,15 @@ package br.com.betohayasida.webcrawler.Modules;
 
 import java.util.Comparator;
 
-import br.com.betohayasida.webcrawler.Store.URLQueueStore;
+import br.com.betohayasida.webcrawler.Store.URLItem;
 
 /**
  * Implementation of Comparator Interface for URLQueueStore
  */
-public class URLComparator implements Comparator<URLQueueStore> {
+public class URLComparator implements Comparator<URLItem> {
 
 	@Override
-	public int compare(URLQueueStore x, URLQueueStore y) {
+	public int compare(URLItem x, URLItem y) {
 		int i = 0;
 	    if (x.getScore() < y.getScore()){
 	    	i = 1;

@@ -25,18 +25,39 @@ public class URLModule {
 		
 		String cUrl = this.canonicalise(sUrl);
 		
-		// Check if it's valid
-		boolean valid = this.valid(cUrl); 
-		
-		if(valid){
-			// Create URL object
-			try {
-				url = new URL(cUrl);
-			} catch (MalformedURLException e) {
-				//e.printStackTrace();
+		if(cUrl != null){
+			// Check if it's valid
+			boolean valid = this.valid(cUrl); 
+			
+			if(valid){
+				
+				// Create URL object
+				try {
+					url = new URL(cUrl);
+				} catch (MalformedURLException e) {
+					//e.printStackTrace();
+				}
+			} else {
+				//throw new InvalidURLException("Invalid URL");
 			}
-		} else {
-			throw new InvalidURLException("Invalid URL");
+		}
+		return url;
+	}
+	
+	/**
+	 * Get the domain of an URL by removing protocols, www, and file paths.
+	 * @param url String of the complete URL
+	 * @return String with the domain
+	 */
+	public String getDomain(String url){
+		
+		url = url.replace("http://", "");
+		url = url.replace("https://", "");
+		url = url.replace("www", "");
+		
+		String[] strips = url.split("/");
+		if(strips.length >= 2){
+			url = strips[0];
 		}
 		
 		return url;
@@ -48,7 +69,6 @@ public class URLModule {
 	 * @return True for valid URL
 	 */
 	public boolean valid(String url){
-		
 		String[] schemes = {"http","https"}; // DEFAULT schemes = "http", "https", "ftp"
 		UrlValidator urlValidator = new UrlValidator(schemes);
 
@@ -63,66 +83,86 @@ public class URLModule {
 	private String canonicalise(String URL){
 		String cURL = URL;
 		
-		// Remove anchors
-		if(cURL.contains("#")){
-			cURL = cURL.substring(0, cURL.indexOf("#"));
-		}
-		
-		// Remove anchors
-		if(cURL.endsWith("=")){
-			cURL = cURL.substring(0, cURL.indexOf("?") - 1);
-		}
-				
-		// Encoding
-		cURL = this.encode(cURL);
-		
-		
-		// Fix protocol
-		if(!(cURL.startsWith("http://") || cURL.startsWith("https://"))){
-			if(cURL.contains("twitter") || cURL.contains("facebook") || cURL.contains("foursquare")){
-				cURL = "https://".concat(cURL);
-			} else {
-				cURL = "http://".concat(cURL);
+		if(!URL.contains("lang=")){
+			// Remove anchors
+			if(cURL.contains("#")){
+				cURL = cURL.substring(0, cURL.indexOf("#"));
 			}
-		}
-		
-		// Twitter-fix
-		if(cURL.contains("www.twitter")){
-			cURL = cURL.replace("www.twitter", "twitter");
-		} 
-		
-		// Foursquare-fix
-		else if(cURL.contains("www.foursquare")){
-			cURL = cURL.replace("www.foursquare", "foursquare");
-		} 
-		
-		// Google-fix
-		else if(cURL.contains("http://www.google.co.uk/intl/en/policies/terms/")){
-			cURL = cURL.replace("http://www.google.co.uk/intl/en/policies/terms/", "http://www.google.com/intl/en/policies/terms/");
-		}
-		else if(cURL.equalsIgnoreCase("https://accounts.google.com/tos?hl=en")){
-			cURL = "http://www.google.co.uk/intl/en/policies/terms/regional.html";
-		}
-		
-		// Convert to lowercase
-		String[] strips = cURL.split("//");
-		if(strips.length > 2){
-			String[] strips2 = strips[1].split("/");
-			cURL = strips[0].concat("//" + strips2[0].toLowerCase() + "/");
-			int size = strips2.length - 1;
-			int i = 0;
-			for(i = 1; i <= size; i++){
-				cURL = cURL.concat(strips2[i]);
+			
+			// Remove anchors
+			if(cURL.endsWith("=")){
+				cURL = cURL.substring(0, cURL.indexOf("?") - 1);
 			}
-			if(strips.length >= 3){
-				size = strips.length;
-				for(i = 2; i < size; i++){
-					cURL = cURL.concat("//" + strips[i]);
+			
+			// Remove anchors
+			if(cURL.endsWith("/")){
+				cURL = cURL.replace(".com/", ".com");
+				cURL = cURL.replace(".co.uk/", ".co.uk");
+				cURL = cURL.replace(".net/", ".net");
+				cURL = cURL.replace(".org/", ".org");
+			}
+					
+			// Encoding
+			cURL = this.encode(cURL);
+			
+			
+			// Fix protocol
+			if(!(cURL.startsWith("http://") || cURL.startsWith("https://"))){
+				if(cURL.contains("twitter") || cURL.contains("facebook") || cURL.contains("foursquare")){
+					cURL = "https://".concat(cURL);
+				} else {
+					cURL = "http://".concat(cURL);
 				}
 			}
+			
+			// Twitter-fix
+			if(cURL.contains("www.twitter")){
+				cURL = cURL.replace("www.twitter", "twitter");
+			} 
+			
+			// Foursquare-fix
+			else if(cURL.contains("www.foursquare")){
+				cURL = cURL.replace("www.foursquare", "foursquare");
+			} 
+			
+			// Google-fix
+			else if(cURL.contains("http://www.google.co.uk/intl/en/policies/terms/")){
+				cURL = cURL.replace("http://www.google.co.uk/intl/en/policies/terms/", "http://www.google.com/intl/en/policies/terms/");
+			}
+			else if(cURL.equalsIgnoreCase("https://accounts.google.com/tos?hl=en")){
+				cURL = "http://www.google.co.uk/intl/en/policies/terms/regional.html";
+			}
+			
+			// Convert to lowercase
+			String[] strips = cURL.split("//");
+			if(strips.length > 2){
+				String[] strips2 = strips[1].split("/");
+				cURL = strips[0].concat("//" + strips2[0].toLowerCase() + "/");
+				int size = strips2.length - 1;
+				int i = 0;
+				for(i = 1; i <= size; i++){
+					cURL = cURL.concat(strips2[i]);
+				}
+				if(strips.length >= 3){
+					size = strips.length;
+					for(i = 2; i < size; i++){
+						cURL = cURL.concat("//" + strips[i]);
+					}
+				}
+			}
+	
+			
+			// Eliminate /?
+			if(cURL.contains("/?")){
+				String[] strips3 = cURL.split("/\\?");
+				if(strips3.length >= 2){
+					cURL = strips3[0];
+				}
+			}
+		} else {
+			cURL = null;
 		}
 		
-		//System.out.println(cURL);
 		return cURL;
 	}
 	

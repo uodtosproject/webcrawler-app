@@ -6,8 +6,13 @@ import org.jsoup.nodes.Element;
 import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
 
-public class TextProcessingModule {
+public class TextProcessor {
 	
+	/**
+	 * Cleans an HTML document, leaving only a set of tags
+	 * @param page Document object (jSoup)
+	 * @return A String with the clean HTML
+	 */
 	public String clean(Document page){
 		String cleaned = new String();
 		Whitelist myWhitelist = new Whitelist();
@@ -24,6 +29,11 @@ public class TextProcessingModule {
 		return cleaned;
 	}
 	
+	/**
+	 * 
+	 * @param page
+	 * @return
+	 */
 	public String process(Document page){
 		String processed = new String();
 		Elements elems = page.getAllElements();

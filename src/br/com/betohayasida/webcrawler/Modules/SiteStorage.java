@@ -4,7 +4,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.com.betohayasida.webcrawler.Store.ToSStore;
+import br.com.betohayasida.webcrawler.Store.TOS;
+import br.com.betohayasida.webcrawler.Store.Page;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -16,10 +17,11 @@ import com.mongodb.MongoClient;
 /**
  * Module responsible for handling the connection with the DB.
  */
-public class StorageModule {
+public class SiteStorage {
 	private MongoClient mongoClient = null;
 	private DBCollection collection = null;
 	private DB db = null;
+	private PageStorage pageStorage = new PageStorage();
 	public String DBNAME = "crawler";
 	public String COLLECTIONNAME = "websites";
 	
@@ -27,19 +29,30 @@ public class StorageModule {
 	 * Connect to the DB.
 	 * @param name DB's name
 	 */
-	public void connect(){
+	public boolean connect(){
+		boolean connected = false;
 		
+		// create client
 		try {
 			mongoClient = new MongoClient();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
-
-		db = mongoClient.getDB(this.DBNAME);
-		collection = db.getCollection(this.COLLECTIONNAME);
 		
+		if(mongoClient != null){
+			db = mongoClient.getDB(this.DBNAME);
+			collection = db.getCollection(this.COLLECTIONNAME);
+			
+			connected = pageStorage.connect();
+		}
+		
+		return connected;
 	}
 	
+	/**
+	 * Returns the DBCollection
+	 * @return DBCollection object
+	 */
 	public DBCollection collection(){
 		return this.collection;
 	}
@@ -51,16 +64,14 @@ public class StorageModule {
 	 * @param originUrl The URL of the website.
 	 * @param page An HTMLPage object containing the source code.
 	 */
-	public void insert(ToSStore tos){
+	public void insert(TOS tos){
+		// Insert or Update 'websites' collection
 		BasicDBObject query = new BasicDBObject("url", tos.getUrl());
 		DBCursor cursor = collection.find(query);
 
-		BasicDBObject doc = new BasicDBObject("filename", tos.getFilename()).
+		BasicDBObject doc = new BasicDBObject("name", tos.getName()).
                 append("url", tos.getUrl()).
-                append("originUrl", tos.getOriginUrl()).
-                append("source", tos.getSource()).
-                append("text", tos.getText()).
-                append("retrievedOn", String.valueOf(System.currentTimeMillis()));
+                append("visitedOn", String.valueOf(System.currentTimeMillis()));
 
 		try {
 			if(cursor.hasNext()) {
@@ -73,6 +84,11 @@ public class StorageModule {
 		} finally {
 		   cursor.close();
 		}
+		
+		// Insert or Update 'pages' collection
+		for(Page page : tos.getPages()){
+			pageStorage.insert(page, tos.getName());
+		}
 	}
 	
 	/**
@@ -80,25 +96,26 @@ public class StorageModule {
 	 * @param url The URL of the page
 	 * @return An String containing the source code of the page.
 	 */
-	public ToSStore read(String url){
-		ToSStore tos = null;
+	public TOS read(String url){
+		// Read from 'websites' collection
+		TOS tos = null;
 		BasicDBObject query = new BasicDBObject("originUrl", url);
 		DBCursor cursor = collection.find(query);
 		
 		try {
 			while(cursor.hasNext()) {
 				DBObject result = cursor.next();
-				tos = new ToSStore();
-				tos.setFilename((String) result.get("filename"));
-				tos.setOriginUrl((String) result.get("originUrl"));
+				tos = new TOS();
+				tos.setName((String) result.get("name"));
 				tos.setUrl((String) result.get("url"));
-				tos.setSource((String) result.get("source"));
-				tos.setText((String) result.get("text"));
-				tos.setRetrievedOn((String) result.get("retrievedOn"));
+				tos.setVisitedOn((String) result.get("visitedOn"));
+				// Read from 'pages' collection
+				tos.setPages(pageStorage.readAll(tos.getName()));
 			}
 		} finally {
 			cursor.close();
 		}
+		
 		
 		return tos;
 	}	
@@ -108,31 +125,32 @@ public class StorageModule {
 	 * @param filename The filename: URL hashed through MD5
 	 * @return ToSStore object
 	 */
-	public ToSStore readFilename(String filename){
-		ToSStore tos = null;
-		BasicDBObject query = new BasicDBObject("filename", filename);
+	public TOS readName(String name){
+		// Read from 'websites' collection
+		TOS tos = null;
+		BasicDBObject query = new BasicDBObject("name", name);
 		DBCursor cursor = collection.find(query);
 		
 		try {
 			while(cursor.hasNext()) {
 				DBObject result = cursor.next();
-				tos = new ToSStore();
-				tos.setFilename((String) result.get("filename"));
-				tos.setOriginUrl((String) result.get("originUrl"));
+				tos = new TOS();
+				tos.setName((String) result.get("name"));
 				tos.setUrl((String) result.get("url"));
-				tos.setSource((String) result.get("source"));
-				tos.setText((String) result.get("text"));
-				tos.setRetrievedOn((String) result.get("retrievedOn"));
+				tos.setVisitedOn((String) result.get("visitedOn"));
 			}
 		} finally {
 			cursor.close();
 		}
 		
+		// Read from 'pages' collection
+		tos.setPages(pageStorage.readAll(tos.getName()));
+		
 		return tos;
 	}
 	
-	public List<ToSStore> last(int limit) {
-		List<ToSStore> results = new ArrayList<ToSStore>();
+	public List<TOS> last(int limit) {
+		List<TOS> results = new ArrayList<TOS>();
 		
 		BasicDBObject sortPredicate = new BasicDBObject();
 		sortPredicate.put("retrievedOn", -1);
@@ -141,14 +159,12 @@ public class StorageModule {
 
 		int i = 0;
 		while(cursor.hasNext() && i < limit){
-			ToSStore tos = new ToSStore();
+			TOS tos = new TOS();
 			DBObject item = cursor.next();
-			tos.setFilename((String) item.get("filename"));
-			tos.setOriginUrl((String) item.get("originUrl"));
-			tos.setRetrievedOn((String) item.get("retrievedOn"));
-			tos.setSource((String) item.get("source"));
-			tos.setText((String) item.get("text"));
+			tos.setName((String) item.get("name"));
 			tos.setUrl((String) item.get("url"));
+			tos.setPages(pageStorage.readAll(tos.getName()));
+			tos.setVisitedOn((String) item.get("visitedOn"));
 			results.add(tos);
 			i++;
 		}

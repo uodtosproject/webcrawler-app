@@ -2,7 +2,11 @@ package br.com.betohayasida.webcrawler.Store;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import br.com.betohayasida.webcrawler.Store.Page;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
@@ -21,53 +25,54 @@ import org.w3c.dom.Element;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class ToSStore {
-	private String filename;
+public class TOS {
+	private String name;
 	private String url;
-	private String originUrl;
-	private String source;
-	private String text;
-	private String retrievedOn;
+	private List<Page> pages = new ArrayList<Page>();
+	private String visitedOn;
 	
-	public String getFilename() {
-		return filename;
+	public String getName() {
+		return name;
 	}
-	public void setFilename(String filename) {
-		this.filename = filename;
+	public void setName(String name) {
+		this.name = name;
 	}
+
 	public String getUrl() {
 		return url;
 	}
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	public String getOriginUrl() {
-		return originUrl;
+	public void addPage(Page page){
+		this.pages.add(page);
 	}
-	public void setOriginUrl(String originUrl) {
-		this.originUrl = originUrl;
+	public Page getPage(String url){
+		Page page = null;
+		for(Page p : this.pages){
+			if(p.getUrl().equalsIgnoreCase(url)){
+				page = p;
+			}
+		}
+		return page;
 	}
-	public String getSource() {
-		return source;
+	public List<Page> getPages(){
+		return this.pages;
 	}
-	public void setSource(String source) {
-		this.source = source;
+	public void setPages(List<Page> list){
+		for(Page p : list){
+			this.pages.add(p);
+		}
 	}
-	public String getText() {
-		return text;
-	}
-	public void setText(String text) {
-		this.text = text;
-	}
-	public String getRetrievedOn() {
-		Date expiry = new Date(Long.parseLong(retrievedOn));
+	public String getVisitedOn() {
+		Date expiry = new Date(Long.parseLong(visitedOn));
 		return expiry.toString();
 	}
-	public Long getRetrievedOnMili() {
-		return Long.parseLong(retrievedOn);
+	public Long getVisitedOnMili() {
+		return Long.parseLong(visitedOn);
 	}
-	public void setRetrievedOn(String retrievedOn) {
-		this.retrievedOn = retrievedOn;
+	public void setVisitedOn(String visitedOn) {
+		this.visitedOn = visitedOn;
 	}
 	
 	/**
@@ -84,23 +89,21 @@ public class ToSStore {
 		     
     		// root elements
     		Document doc = docBuilder.newDocument();
+    		
     		Element rootElement = doc.createElement("tos");
-    		rootElement.setAttribute("id", filename);
+    		rootElement.setAttribute("URL", this.url);
+    		rootElement.setAttribute("id", this.name);
     		if(archive) rootElement.setAttribute("archived", "true");
     		else rootElement.setAttribute("archived", "false");
     		doc.appendChild(rootElement);
     		
-    		Element originURL = doc.createElement("URL");
-    		originURL.appendChild(doc.createTextNode(this.getOriginUrl()));
-    		rootElement.appendChild(originURL);
-    		
-    		Element URL = doc.createElement("ToS_URL");
-    		URL.appendChild(doc.createTextNode(this.getUrl()));
-    		rootElement.appendChild(URL);
-    		
-    		Element Text = doc.createElement("text");
-    		Text.appendChild(doc.createTextNode(this.getText()));
-    		rootElement.appendChild(Text);
+    		for(Page p : this.pages){
+	    		Element page = doc.createElement("page");
+	    		page.setAttribute("url", p.getUrl());
+	    		page.setAttribute("retrievedOn", p.getRetrievedOn());
+	    		page.appendChild(doc.createTextNode(p.getText()));
+	    		rootElement.appendChild(page);
+    		}
     		
     		// write the content into xml file
     		TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -131,8 +134,7 @@ public class ToSStore {
 		
 		try {
 			PrintWriter writer = response.getWriter();
-			JToSStore jTos = new JToSStore(this.filename, this.url, this.originUrl, this.text, archived);
-			writer.write(gson.toJson(jTos));
+			writer.write(gson.toJson(this));
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();

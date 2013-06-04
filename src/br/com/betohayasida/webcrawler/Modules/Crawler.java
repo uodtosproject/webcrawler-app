@@ -9,17 +9,25 @@ import org.jsoup.nodes.Document;
 
 import br.com.betohayasida.webcrawler.Exceptions.DownloadException;
 import br.com.betohayasida.webcrawler.Exceptions.InvalidURLException;
-import br.com.betohayasida.webcrawler.Store.ErrorStore;
+import br.com.betohayasida.webcrawler.Store.HTTPHeader;
 import br.com.betohayasida.webcrawler.Store.HTMLPage;
 import br.com.betohayasida.webcrawler.Store.LinkStore;
-import br.com.betohayasida.webcrawler.Store.ToSStore;
+import br.com.betohayasida.webcrawler.Store.Page;
+import br.com.betohayasida.webcrawler.Store.TOS;
 
 public class Crawler {
 	//private static long oldInterval = 604800000;
 	private static long oldInterval = 2;
 	
-	public HashMap<String, ToSStore> mcrawl(String urls){
-		HashMap<String, ToSStore> results = new HashMap<String, ToSStore>();
+	/**
+	 * Multiple crawling
+	 * @param urls String of urls separated by whitespaces
+	 * @return HashMap<String, TOS>, TOS indexed by URL
+	 * @throws InvalidURLException If the URL is invalid
+	 * @throws DownloadException If the page cannot be downloaded
+	 */
+	public HashMap<String, TOS> mcrawl(String urls) throws InvalidURLException, DownloadException{
+		HashMap<String, TOS> results = new HashMap<String, TOS>();
 		
         String[] urlList = urls.split("\\s+"); 
         List<String> pUrlList = new ArrayList<String>();
@@ -33,183 +41,179 @@ public class Crawler {
 		
 		return results;
 	}
- 
-	public ToSStore crawl(String sUrl) {
+	
+	/**
+	 * Crawls a website
+	 * @param initialUrlString Initial URL
+	 * @return A TOS object
+	 * @throws InvalidURLException If the URL is invalid
+	 * @throws DownloadException If the page cannot be downloaded
+	 */
+	public TOS crawl(String initialUrlString) throws InvalidURLException, DownloadException {
 		boolean debug = false;
 		HTTPModule downloader = new HTTPModule();
 		URLModule urlMod = new URLModule();
 		URLQueue queue = new URLQueue();
-		AnalysisModule analyst = new AnalysisModule();
-		TextProcessingModule tpros = new TextProcessingModule();
-		StorageModule store = new StorageModule();
-		String originUrl = null;
-		List<String> visited = new ArrayList<String>();
-		ToSStore tos = null;
+		Analist analist = new Analist();
+		TextProcessor textProcessor = new TextProcessor();
+		SiteStorage siteStore = new SiteStorage();
+		TOS tos = null;
 		
-		// Connect to the DB
-		store.connect();
+		// BEGIN Connect to DB
+		if(siteStore.connect()){
 		
-		// BEGIN Create URL object
-		URL url = null;
-		try {
-			url = urlMod.create(sUrl);
-		} catch (InvalidURLException e) {
-			// If it's an invalid URL
-			if(debug) System.out.println(e.getMessage());
-		}
-		// END Create URL object
-		
-		if(url != null){
-			tos = store.read(url.toString());
+			// BEGIN Create URL object
+			URL initalUrl = urlMod.create(initialUrlString);
+			// END Create URL object
+			
+			// BEGIN Check for existing entry in the DB
+			tos = siteStore.read(initalUrl.toString());
 			boolean old = false;
 			if(tos != null){
-				Long retrievedOn = tos.getRetrievedOnMili();
+				Long visitedOn = tos.getVisitedOnMili();
 				Long now = System.currentTimeMillis();
-				old = (now - retrievedOn) >= oldInterval;
-			}
-			// BEGIN Check if it's valid
-			ErrorStore code = new ErrorStore();
-			if((tos == null || old) && downloader.checkHeaders(url, code)){
+				old = (now - visitedOn) >= oldInterval;
 				
 				if(old){
-					ArchiveModule archive = new ArchiveModule();
-					archive.connect();
-					archive.insert(tos);
+					//ARCHIVE
+					
+					tos = null;
 				}
-				
+			}
+			// END Check for existing entry in the DB
+			
+			// BEGIN If there's no entry
+			if(tos == null || old){
+				// Loop variables
 				boolean found = false;
-				int iteration = 1;
+				boolean end = false;
+				List<String> visited = new ArrayList<String>();
+				URL url = null;
+				int iteration = 0;
 				
-				originUrl = url.toString();
-				
-				// Add URL to the queue
-				queue.add(url, 100);
+				String domain = urlMod.getDomain(initalUrl.toString());
+				queue.add(initalUrl.toString(), 100);
 				
 				// BEGIN Crawl loop
-				while(!queue.empty() && !found){
-					if(debug) System.out.println();
+				while(!queue.empty() && !end){
+					iteration++;
 					
-					// Get an URL
-					url = queue.next();
-					visited.add(url.toString());
-					if(debug) System.out.println("Fetching " + url.toString());
-
-					// BEGIN Not 302
-					downloader.checkHeaders(url, code);
-					System.out.println(url + " " + code.getCode());
-					if(code.getCode() == 302 || code.getCode() == 301){
-						System.out.println(code.getArg());
-						try {
-							url = urlMod.create(code.getArg());
-							if(url != null){
-								queue.add(url, 100);
-								if(debug) System.out.println("Adding " + url.toString() + " to the queue");
-							}
-						} catch (InvalidURLException e) {
-							// If it's an invalid URL
-							if(debug) System.out.println(e.getMessage());
-						}
+					if(iteration > 200){
+						end = true;
 					}
 					
-					// ELSE Not 302
-					else {
-						
-						// BEGIN Download page
-						HTMLPage file = null;
-						try {
-							file = downloader.download(url);
-						} catch (DownloadException e) {
-							if(debug) System.out.println(e.getMessage());
-						}
-						// END Download page
-						
-						// BEGIN If it's a valid file
-						if(file != null){
-							
-							// Parse page
-							Document page = analyst.parse(file, url.toString());
-							if(debug) System.out.println("Parsing " + url.toString());
-							if(debug) System.out.println(page.toString());
-							
-							// Analyze page
-							found = analyst.analyse(page, url.toString()); 
-							if(debug) System.out.println("Analysing " + url.toString());
-							
-							// BEGIN If it's the Terms and Conditions page
-							if(found){
-								
-								if(debug) System.out.println("FOUND! " + url.toString());
-								tos = new ToSStore();
-								tos.setFilename(file.filename());
-								tos.setOriginUrl(originUrl);
-								tos.setUrl(url.toString());
-								tos.setSource(file.html());
-								tos.setText(tpros.clean(page));
-								tpros.process(page);
-								store.insert(tos);
-								tos = store.read(originUrl);
-								//store.list();
-								
-							// ELSE If not, retrieve relevant links
-							} else {
-								
-								// Retrieve the relevant links
-								List<LinkStore> listOfLinks = analyst.links(page, visited);
-								
-								// BEGIN Add links to the queue
-								for(LinkStore item : listOfLinks){
-									
-									// Check if it's not the same page
-									if(!item.getUrl().equalsIgnoreCase(url.toString())){
-										int score = 100 - iteration;
-										
-										// If the link seems relevant, higher score
-										if(item.getText().toLowerCase().contains("terms") || item.getText().toLowerCase().contains("agreement")){ 
-											score = 100 - iteration + 2;
-										}
-										
-										// BEGIN Create URL object
-										URL tUrl = null;
-										try {
-											tUrl = urlMod.create(item.getUrl());
-										} catch (InvalidURLException e) {
-											// If it's an invalid URL
-											if(debug) System.out.println(e.getMessage());
-										}
-										// END Create URL object
-										
-										
-										// if it's a valid URL
-										if(tUrl != null){
-											queue.add(tUrl, score);
-											if(debug) System.out.println("Adding " + tUrl.toString() + " to the queue");
-										}
-										
-									}
-								}
-								// END Add links to the queue
-								
-							}
-							// END If it's the Terms and Conditions page
-							
-						}
-						// END If it's a valid file
-						
-					} // END Not 302
+					// Get an URL
+					String urlString = queue.next();
 					
-				}
-				// END Crawl loop
+					// BEGIN If it's the same domain
+					if(urlString.contains(domain)){
+					
+						// BEGIN Create URL object
+						url = urlMod.create(urlString);
+						// END Create URL object
+	
+						// BEGIN If haven't visited the page
+						if(url!= null && !visited.contains(url.toString()) && downloader.checkRobots(url)){
+							visited.add(urlString);
+							
+							if(debug) System.out.println("START " + urlString);
+						
+							// BEGIN If it's a valid URL
+							HTTPHeader header = new HTTPHeader();
+							if(downloader.checkHeaders(url, header)){
+			
+								if(debug) System.out.println("HTTP HEAD: " + header.getCode());
+								
+								// BEGIN If it's 302 or 301
+								if(header.getCode() == 302 || header.getCode() == 301){
+									
+									if(debug) System.out.println("Adding HTTP Head location: " + header.getLocation());
+									queue.add(header.getLocation(), 100);
+									
+								// ELSE If it's 302 or 301
+								} else {
+									
+									// Download page
+									HTMLPage file = downloader.download(url);
+									
+									// BEGIN If it's a valid file
+									if(file != null){
+										
+										// Parse page
+										Document doc = analist.parse(file, url.toString());
+										if(debug) System.out.println("Parsing " + url.toString());
+										
+										// Analyze page
+										found = analist.analyse(doc, url.toString()); 
+										if(debug) System.out.println("Analysing " + url.toString());
+										
+										// BEGIN If it's the Terms and Conditions page
+										if(found){
+											
+											if(debug) System.out.println("Adding page " + url.toString());
+											
+											if(tos == null){
+												tos = new TOS();
+												tos.setName(file.filename());
+												tos.setUrl(initialUrlString);
+											}
+											
+											Page page = new Page();
+											page.setParentName(tos.getName());
+											page.setSource(file.html());
+											page.setText(textProcessor.clean(doc));
+											page.setUrl(url.toString());
+											tos.addPage(page);
+											
+										// ELSE If not, retrieve relevant links
+										} else {
+											
+											// Retrieve the relevant links
+											List<LinkStore> listOfLinks = analist.links(doc, visited);
+											
+											// BEGIN Add links to the queue
+											for(LinkStore item : listOfLinks){
+												
+												// BEGIN Check if it's not the same page
+												if(!item.getUrl().equalsIgnoreCase(url.toString())){
+													int score = 200 - iteration;
+													
+													// If the link seems relevant, higher score
+													if(analist.relevantPLink(item.getUrl()) || analist.relevantPLink(item.getText())){ 
+														score = 200;
+													}
+													
+													// Add link to the queue
+													queue.add(item.getUrl(), score);
+													if(debug) System.out.println("Adding " + item.getUrl() + " to the queue");
+													
+												} // END Check if it's not the same page
+												
+											} // END Add links to the queue
+											
+										} // END If it's the Terms and Conditions page
+										
+									} // END If it's a valid file
+									
+								} // END If it's 302 or 301
+								
+							} // END If it's a valid URL
+							
+						} // END Haven't visited the page
+						
+					} // END If it's the same domain
+					
+				} // END Crawl loop
 				
-				if(!found){
-					if(debug) System.out.println("NOT FOUND!");
+				if(tos != null){
+					// Save entry
+					siteStore.insert(tos);
 				}
 				
-			} else {
-				if(debug) System.out.println("Invalid URL!");
-			}
-			// END Check if it's valid
+			} // END If there's no entry
+			
+		} // END Connect to DB
 		
-		}
 		return tos;
 		
 	}

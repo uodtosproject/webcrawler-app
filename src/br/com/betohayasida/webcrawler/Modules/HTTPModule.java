@@ -2,14 +2,26 @@ package br.com.betohayasida.webcrawler.Modules;
 import java.net.*;
 import java.io.*;
 
+import net.sourceforge.jrobotx.RobotExclusion;
+
 import br.com.betohayasida.webcrawler.Exceptions.DownloadException;
-import br.com.betohayasida.webcrawler.Store.ErrorStore;
+import br.com.betohayasida.webcrawler.Store.HTTPHeader;
 import br.com.betohayasida.webcrawler.Store.HTMLPage;
 
 /**
  * Class responsible for downloading pages and headers.
  */
 public class HTTPModule {
+	
+	public static void main(String[] args) throws MalformedURLException{
+		HTTPModule m = new HTTPModule();
+		URL url = new URL("http://www.betohayasida.com.br/cgi-bin/");
+		if(m.checkRobots(url)){
+			System.out.println("True");
+		} else {
+			System.out.println("False");
+		}
+	}
 	
 	/**
 	 * Download an URL and save it as an HTMLPage Object
@@ -50,7 +62,7 @@ public class HTTPModule {
 	 * @param url URL of the page
 	 * @return True if the URL leads to a valid page
 	 */
-	public boolean checkHeaders(URL url, ErrorStore code){
+	public boolean checkHeaders(URL url, HTTPHeader code){
         HttpURLConnection.setFollowRedirects(false);
         HttpURLConnection connection = null;
         boolean valid = false;
@@ -74,7 +86,7 @@ public class HTTPModule {
 		if(valid){
 			code.setCode(Integer.parseInt(header.split(" ")[1]));
 			if(code.getCode() == 302 || code.getCode() == 301){
-				code.setArg(connection.getHeaderField("location"));
+				code.setLocation(connection.getHeaderField("location"));
 			}
 		}
 		/*if(valid){
@@ -94,4 +106,15 @@ public class HTTPModule {
 
         return valid;
     }
+	
+	/**
+	 * Checks if it's permitted to crawl an URL
+	 * @param url URL to be crawled
+	 * @return True, if robots.txt allows it
+	 */
+	public boolean checkRobots(URL url){
+		String UserAgent = "Java/1.6.0_26";
+		RobotExclusion robotExclusion = new RobotExclusion();
+		return robotExclusion.allows(url, UserAgent);
+	}
 }

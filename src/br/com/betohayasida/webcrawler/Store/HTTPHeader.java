@@ -1,9 +1,9 @@
 package br.com.betohayasida.webcrawler.Store;
 
-public class ErrorStore {
+public class HTTPHeader {
 
 	private int code;
-	private String arg;
+	private String location;
 
 	public int getCode() {
 		return code;
@@ -13,12 +13,13 @@ public class ErrorStore {
 		this.code = code;
 	}
 
-	public String getArg() {
-		return arg;
+	public String getLocation() {
+		return location;
 	}
 
-	public void setArg(String arg) {
-		this.arg = arg;
+	public void setLocation(String location) {
+		this.location = location;
 	}
+
 
 }

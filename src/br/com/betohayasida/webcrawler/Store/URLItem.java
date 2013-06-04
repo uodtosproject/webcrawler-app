@@ -1,18 +1,17 @@
 package br.com.betohayasida.webcrawler.Store;
 
-import java.net.URL;
 
 /**
  * Class for storing items of the URL Priority Queue
  */
-public class URLQueueStore {
-	private URL url;
+public class URLItem {
+	private String url;
 	private int score;
 	
-	public URL getUrl() {
+	public String getUrl() {
 		return url;
 	}
-	public void setUrl(URL url) {
+	public void setUrl(String url) {
 		this.url = url;
 	}
 	

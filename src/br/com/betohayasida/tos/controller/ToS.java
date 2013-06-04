@@ -10,10 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import br.com.betohayasida.webcrawler.Modules.ArchiveModule;
 import br.com.betohayasida.webcrawler.Modules.Crawler;
-import br.com.betohayasida.webcrawler.Modules.StorageModule;
-import br.com.betohayasida.webcrawler.Store.ToSStore;
+import br.com.betohayasida.webcrawler.Modules.SiteStorage;
+import br.com.betohayasida.webcrawler.Store.TOS;
 
 // Extend HttpServlet class
 public class ToS extends HttpServlet {
@@ -32,9 +31,9 @@ public class ToS extends HttpServlet {
 		if(URIparts.length == 3){
 			// PATH: /msearch
 			if(URIparts[2].equalsIgnoreCase("msearch")){
-		    	StorageModule store = new StorageModule();
+		    	SiteStorage store = new SiteStorage();
 		    	store.connect();
-		    	List<ToSStore> last = store.last(10);
+		    	List<TOS> last = store.last(10);
 			    RequestDispatcher rd=request.getRequestDispatcher("/WEB-INF/view/tos_multi.jsp");
 				request.setAttribute("last", last);
 				request.setAttribute("active", "msearch");
@@ -54,13 +53,13 @@ public class ToS extends HttpServlet {
 			
 			// PATH /tos/[filename]
 			if(URIparts[2].equalsIgnoreCase("tos")){
-			    String filename = URIparts[3];
-			    if(filename != null){
-			    	StorageModule store = new StorageModule();
+			    String name = URIparts[3];
+			    if(name != null){
+			    	SiteStorage store = new SiteStorage();
 			    	store.connect();
-			    	ToSStore tos = store.readFilename(filename);
+			    	TOS tos = store.readName(name);
 			    	if(tos != null){
-						request.setAttribute("url", tos.getOriginUrl()); 
+						request.setAttribute("url", tos.getUrl()); 
 						request.setAttribute("tos", tos);
 
 						RequestDispatcher rd=request.getRequestDispatcher("/WEB-INF/view/tos_view.jsp");
@@ -75,11 +74,11 @@ public class ToS extends HttpServlet {
 			}
 			 // PATH: /xml/[filename]
 			else if(URIparts[2].equalsIgnoreCase("xml")){
-			    String filename = URIparts[3];
-			    if(filename != null){
-			    	StorageModule store = new StorageModule();
+			    String name = URIparts[3];
+			    if(name != null){
+			    	SiteStorage store = new SiteStorage();
 			    	store.connect();
-			    	ToSStore tos = store.readFilename(filename);
+			    	TOS tos = store.readName(name);
 			    	if(tos != null){
 			    		tos.printToXML(response, false);
 			    	} else {
@@ -91,11 +90,11 @@ public class ToS extends HttpServlet {
 			} 
 			// PATH: /json/[filename]
 			else if(URIparts[2].equalsIgnoreCase("json")){
-			    String filename = URIparts[3];
-			    if(filename != null){
-			    	StorageModule store = new StorageModule();
+			    String name = URIparts[3];
+			    if(name != null){
+			    	SiteStorage store = new SiteStorage();
 			    	store.connect();
-			    	ToSStore tos = store.readFilename(filename);
+			    	TOS tos = store.readName(name);
 			    	if(tos != null){
 			    		tos.printToJSON(response, false);
 			    	} else {
@@ -107,24 +106,10 @@ public class ToS extends HttpServlet {
 			} 
 			// PATH: /archive/[filename]
 			else if(URIparts[2].equalsIgnoreCase("archive")){
-			    String filename = URIparts[3];
-			    if(filename != null){
-			    	StorageModule store = new StorageModule();
-			    	store.connect();
-			    	ToSStore tos = store.readFilename(filename);
-			    	if(tos != null){
-				    	ArchiveModule archive = new ArchiveModule();
-				    	archive.connect();
-				    	List<ToSStore> results = archive.archive(filename);
-						request.setAttribute("url", tos.getOriginUrl()); 
-						request.setAttribute("results", results);
-	
-						RequestDispatcher rd=request.getRequestDispatcher("/WEB-INF/view/tos_archive.jsp");
-						request.setAttribute("title", "Archive for " + tos.getOriginUrl());
-						rd.forward(request,response);
-			    	} else {
-					    redirectHome(request,response,null,null);
-			    	}
+			    String name = URIparts[3];
+			    if(name != null){
+			    	redirectHome(request,response,null,null);
+			    	
 			    } else {
 				    redirectHome(request,response,null,null);
 				}
@@ -143,39 +128,12 @@ public class ToS extends HttpServlet {
 				
 				// PATH: /archive/json/[filename]/[retrievedOn]
 				if(URIparts[3].equalsIgnoreCase("json")){
-				    String filename = URIparts[4];
-				    String retrievedOn = URIparts[5];
-				    if(filename != null){
-				    	ArchiveModule archive = new ArchiveModule();
-				    	archive.connect();
-				    	ToSStore tos = archive.read(filename, retrievedOn);
-				    	if(tos != null){
-				    		tos.printToJSON(response, true);
-				    	} else {
-						    redirectHome(request,response,null,null);			    
-						}
-				    } else {
-					    redirectHome(request,response,null,null);
-					}
-					
+					redirectHome(request,response,null,null);
 				} 
 				
 				// PATH: /archive/xml/[filename]/[retrievedOn]
 				else if(URIparts[3].equalsIgnoreCase("xml")){
-				    String filename = URIparts[4];
-				    String retrievedOn = URIparts[5];
-				    if(filename != null){
-				    	ArchiveModule archive = new ArchiveModule();
-				    	archive.connect();
-				    	ToSStore tos = archive.read(filename, retrievedOn);
-				    	if(tos != null){
-				    		tos.printToXML(response, true);
-				    	} else {
-						    redirectHome(request,response,null,null);			    
-						}
-				    } else {
-					    redirectHome(request,response,null,null);
-					}
+					redirectHome(request,response,null,null);
 
 				} else {
 				    redirectHome(request,response,null,null);
@@ -203,10 +161,14 @@ public class ToS extends HttpServlet {
 			// PATH: /msearch
 			if(URIparts[2].equalsIgnoreCase("msearch")){
 				String urls = (String) request.getParameterValues("urls")[0];
-				HashMap<String, ToSStore> results = new HashMap<String, ToSStore>();
+				HashMap<String, TOS> results = new HashMap<String, TOS>();
 				
 				Crawler crawler = new Crawler();
-				results  = crawler.mcrawl(urls);
+				try {
+					results  = crawler.mcrawl(urls);
+				} catch (Exception e) {
+					redirectHome(request,response,"ERROR",e.getMessage());
+				} 
 				request.setAttribute("results", results);
 				
 			    RequestDispatcher rd=request.getRequestDispatcher("/WEB-INF/view/tos_multi_results.jsp");
@@ -219,15 +181,21 @@ public class ToS extends HttpServlet {
 			// PATH: /search
 			else if(URIparts[2].equalsIgnoreCase("search")){
 				String url = (String) request.getParameterValues("url")[0];
-				ToSStore tos = null;
+				TOS tos = null;
 				
 				Crawler crawler = new Crawler();
-				tos  = crawler.crawl(url);
-				
-				if(tos != null){
-					response.sendRedirect(request.getContextPath().toString() + "/tos/" + tos.getFilename());
-				} else {
-					redirectHome(request,response,"Not found!", "No results found were found for \"" + url + "\"");
+				try {
+					
+					tos  = crawler.crawl(url);
+					
+					if(tos != null){
+						response.sendRedirect(request.getContextPath().toString() + "/tos/" + tos.getName());
+					} else {
+						redirectHome(request,response,"Not found!", "No results found were found for \"" + url + "\"");
+					}
+					
+				} catch (Exception e) {
+					redirectHome(request,response,"ERROR",e.getMessage());
 				}
 			} 
 			
@@ -240,9 +208,9 @@ public class ToS extends HttpServlet {
 	}
 	
 	protected void redirectHome(HttpServletRequest request, HttpServletResponse response, String alertTitle, String alertText) throws ServletException, IOException{
-    	StorageModule store = new StorageModule();
+    	SiteStorage store = new SiteStorage();
     	store.connect();
-    	List<ToSStore> last = store.last(10);
+    	List<TOS> last = store.last(10);
 	    RequestDispatcher rd=request.getRequestDispatcher("/WEB-INF/view/tos_search.jsp");
 		request.setAttribute("last", last);
 		request.setAttribute("alertText", alertText);
