@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
-<%@ page import="br.com.betohayasida.webcrawler.Store.TOS,java.util.List,java.lang.reflect.Array;" %>
+<%@ page import="br.com.betohayasida.webcrawler.Store.Site,java.util.List,java.lang.reflect.Array;" %>
 <%@ include file="header.jsp" %>
 
 			<div class="hero-unit">
@@ -16,7 +16,7 @@
 				    <div class="btn-group">
 					    <button class="btn services btn-inverse" value="https://www.facebook.com">Facebook</button>
 					    <button class="btn services btn-inverse" value="https://www.twitter.com">Twitter</button>
-					    <button class="btn services btn-inverse" value="http://plus.google.com">Google+</button>
+					    <button class="btn services btn-inverse" value="https://plus.google.com">Google+</button>
 					    <button class="btn services btn-inverse" value="http://www.linkedin.com">Linkedin</button>
 				    </div>
 				</div>
@@ -24,17 +24,17 @@
 				    <h2>Last services searched</h2>
 				    <div class="row">
 					    <%
-					    	List<TOS> last = (List<TOS>)request.getAttribute("last"); int i = 0;
+					    	List<Site> last = (List<Site>)request.getAttribute("last"); int i = 0;
 					    %>
 					    <div class="span3">
 					    <%
-					    	for(TOS tos : last) { i++;
+					    	for(Site site : last) { i++;
 					    %>
-						<p><button class="btn services btn-inverse btn-xlarge" value="<%= tos.getUrl() %>"><%= tos.getUrl() %></button></p>
-					    <% if(i==5) { %>
+						<p><button class="btn services btn-inverse btn-xlarge" value="<%= site.getUrl() %>"><%= site.getUrl() %></button></p>
+					    	<% if(i==5) { %>
 					    </div>
 					    <div class="span3">
-					    <% } %>
+					    	<% } %>
 					    <% } %>
 					    </div>
 				    </div>
