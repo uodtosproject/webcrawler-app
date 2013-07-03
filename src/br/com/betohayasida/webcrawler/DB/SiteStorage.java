@@ -29,6 +29,7 @@ public class SiteStorage extends MongoBase {
 			
 			BasicDBObject doc = new BasicDBObject("name", site.getName()).
 	                append("url", site.getUrl()).
+	                append("domain", site.getDomain()).
 	                append("visitedOn", site.getVisitedOn());
 			
 			try {
@@ -73,7 +74,7 @@ public class SiteStorage extends MongoBase {
 				while(cursor.hasNext()) {
 					DBObject result = cursor.next();
 					
-					site = new Site((String) result.get("name"), (String) result.get("url"), (String) result.get("visitedOn"));
+					site = new Site((String) result.get("name"), (String) result.get("url"), (String) result.get("visitedOn"), (String) result.get("domain"));
 					site.addPages(pageStorage.get(site.getName() + "|" + site.getVisitedOnMili()));
 					
 				}
@@ -105,7 +106,7 @@ public class SiteStorage extends MongoBase {
 				while(cursor.hasNext()) {
 					DBObject result = cursor.next();
 					
-					site = new Site((String) result.get("name"), (String) result.get("url"), (String) result.get("visitedOn"));
+					site = new Site((String) result.get("name"), (String) result.get("url"), (String) result.get("visitedOn"), (String) result.get("domain"));
 					site.addPages(pageStorage.get(site.getName() + "|" + site.getVisitedOnMili()));
 					
 				}
@@ -137,7 +138,7 @@ public class SiteStorage extends MongoBase {
 				while(cursor.hasNext()) {
 					DBObject result = cursor.next();
 					
-					Site site = new Site((String) result.get("name"), (String) result.get("url"), (String) result.get("visitedOn"));
+					Site site = new Site((String) result.get("name"), (String) result.get("url"), (String) result.get("visitedOn"), (String) result.get("domain"));
 					site.addPages(pageStorage.get(site.getName() + "|" + site.getVisitedOnMili()));
 					sites.add(site);
 				}
@@ -169,7 +170,7 @@ public class SiteStorage extends MongoBase {
 				while(cursor.hasNext()) {
 					DBObject result = cursor.next();
 					
-					Site site = new Site((String) result.get("name"), (String) result.get("url"), (String) result.get("visitedOn"));
+					Site site = new Site((String) result.get("name"), (String) result.get("url"), (String) result.get("visitedOn"), (String) result.get("domain"));
 					site.addPages(pageStorage.get(site.getName() + "|" + site.getVisitedOnMili()));
 					sites.add(site);
 				}
@@ -206,6 +207,7 @@ public class SiteStorage extends MongoBase {
 				site.setName((String) result.get("name"));
 				site.setUrl((String) result.get("url"));
 				site.setVisitedOn((String) result.get("visitedOn"));
+				site.setDomain((String) result.get("domain"));
 				
 				results.add(site);
 				

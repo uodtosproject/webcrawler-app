@@ -4,14 +4,25 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import br.com.betohayasida.webcrawler.Modules.LogProducer;
+import br.com.betohayasida.webcrawler.Modules.MyLogger;
 import br.com.betohayasida.webcrawler.Store.Link;
 
 /**
  * Implementation of a priority queue for URLs.
  */
-public class URLQueue {
+public class URLQueue extends LogProducer {
 	private Comparator<URLItem> comparator = new URLComparator();
     private PriorityQueue<URLItem> queue = new PriorityQueue<URLItem>(20, comparator);
+    
+    public URLQueue(){
+    	this.logger = new MyLogger("output-urlqueue.txt");
+    }
+    
+    public URLQueue(MyLogger logger){
+    	this.logger = logger;
+    	this.debug = true;
+    }
     
     /**
      * Adds an URL to the queue.
@@ -24,6 +35,7 @@ public class URLQueue {
 		urlS.setScore(score);
 		
 		queue.add(urlS);
+		log("URL(" + urlS.getUrl() + ") added to queue, with score " + score, "URLQueue.add");
 	}
 	
 	/**
@@ -37,6 +49,7 @@ public class URLQueue {
 			url.setUrl(ls.getUrl());
 			url.setScore(score);
 			queue.add(url);
+			log("URL(" + url.getUrl() + ") added to queue, with score " + score, "URLQueue.add");
 		}
 	}
 	
@@ -50,6 +63,7 @@ public class URLQueue {
 		if(urlS != null){
 			url = urlS.getUrl();
 		}
+		log("Still " + queue.size() + " in queue", "URLQueue.next");
 		return url;
 	}
 	

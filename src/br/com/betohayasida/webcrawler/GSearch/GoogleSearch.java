@@ -9,9 +9,21 @@ import java.util.List;
 
 import com.google.gson.Gson;
 
+import br.com.betohayasida.webcrawler.Modules.Analyst;
+import br.com.betohayasida.webcrawler.Modules.LogProducer;
+import br.com.betohayasida.webcrawler.Modules.MyLogger;
 import br.com.betohayasida.webcrawler.Store.Link;
 
-public class GoogleSearch {
+public class GoogleSearch extends LogProducer{
+	
+	public GoogleSearch(){
+		this.logger = new MyLogger("output-google_search.txt");
+	}
+	
+	public GoogleSearch(MyLogger logger){
+		this.logger = logger;
+		this.debug = true;
+	}
 	
 	/**
 	 * Retrieves links from a Google Search through its API
@@ -32,14 +44,17 @@ public class GoogleSearch {
 			try {
 				reader = new InputStreamReader(url.openStream(), charset);
 			    GoogleResults results = new Gson().fromJson(reader, GoogleResults.class);
-
+			    Analyst analyst = new Analyst();
+			    
 			    List<Result> resultsList = results.getResponseData().getResults();
 			    for(Result r : resultsList){
 			    	Link link = new Link();
 			    	link.setText(r.getTitle());
 			    	link.setUrl(r.getUrl());
-			    	System.out.println(" +g " + link.getUrl());
-			    	list.add(link);
+			    	if(!analyst.blackListed(link.getText()) && !analyst.blackListed(link.getUrl())){
+				    	log("adding " + link.getUrl(), "GoogleSearch.search");
+				    	list.add(link);
+			    	}
 			    }
 			    
 			} catch (Exception e) {

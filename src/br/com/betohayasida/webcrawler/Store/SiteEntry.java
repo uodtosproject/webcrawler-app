@@ -6,6 +6,7 @@ public class SiteEntry {
 	protected String name = null;
 	protected String url = null;
 	protected String visitedOn = null;
+	protected String domain = null;
 	
 	public String getName() {
 		return name;
@@ -33,5 +34,11 @@ public class SiteEntry {
 	}
 	public void setVisitedOn(String visitedOn) {
 		this.visitedOn = visitedOn;
+	}
+	public String getDomain(){
+		return this.domain;
+	}
+	public void setDomain(String domain){
+		this.domain = domain;
 	}
 }

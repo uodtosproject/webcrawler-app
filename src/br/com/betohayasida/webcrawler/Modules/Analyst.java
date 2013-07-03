@@ -10,11 +10,11 @@ import org.jsoup.select.Elements;
 /**
  * Module responsible for analyzing pages, checking their links and content.
  */
-public class Analyst {
-	private List<String> relevantlist;
-	private List<String> blacklist;
+public class Analyst extends LogProducer {
+	private List<String> relevantlist = null;
+	private List<String> blacklist = null;
 	
-	public Analyst(){
+	private void init(){
 		relevantlist = new ArrayList<String>();
 		relevantlist.add("account");
 		relevantlist.add("agreement");
@@ -22,7 +22,6 @@ public class Analyst {
 		relevantlist.add("conditions");
 		relevantlist.add("eula");
 		relevantlist.add("faq");
-		relevantlist.add("forum");
 		relevantlist.add("help");
 		relevantlist.add("policy");
 		relevantlist.add("policies");
@@ -37,14 +36,37 @@ public class Analyst {
 		blacklist = new ArrayList<String>();
 		blacklist.add("lang="); 
 		blacklist.add("RMNixonDeceased");
+		blacklist.add("OPENforum");
 		blacklist.add("language");
 		blacklist.add("directory");
 		blacklist.add("appcenter");
 		blacklist.add("redirect");
 		blacklist.add("photo.php");
 		blacklist.add("r.php");
-		blacklist.add("support.google.com/maps/");
-		blacklist.add("support.google.com/youtube/");
+		blacklist.add("RecoverAccount");
+		blacklist.add("/accounts/recovery");
+		blacklist.add("/user/");
+		blacklist.add("/photos/");
+		blacklist.add("/album/");
+		blacklist.add("/member/");
+		blacklist.add("/invite/");
+		blacklist.add("sign");
+		blacklist.add("MemberId");
+		blacklist.add("forum");
+		blacklist.add("discussion");
+		blacklist.add("communit");
+		blacklist.add("ProfilePhoto");
+	}
+	
+	public Analyst(){
+		init();
+		this.logger = new MyLogger("output-analyst.txt");
+	}
+	
+	public Analyst(MyLogger logger){
+		init();
+		this.logger = logger;
+		this.debug = true;
 	}
 	
 	/**
@@ -95,7 +117,7 @@ public class Analyst {
 	 */
 	public boolean relevantListed(String text){
 		for(String term : this.relevantlist){
-			if(text.toLowerCase().contains(term)){
+			if(text.toLowerCase().contains(term.toLowerCase())){
 				return true;
 			}
 		}
@@ -109,11 +131,16 @@ public class Analyst {
 	 */
 	public boolean blackListed(String text){
 		for(String term : this.blacklist){
-			if(text.toLowerCase().contains(term)) return true;
+			if(text.toLowerCase().contains(term.toLowerCase())) return true;
 		}
 		return false;
 	}
 	
+	/**
+	 * Checks if it's not a profile page on Twitter
+	 * @param title String containing the title of the page
+	 * @return True if it's a profile page
+	 */
 	public boolean titleRegex(String title){
 		return title.matches("^(\\w+\\s+)+\\(.*\\) on Twitter$");
 	}

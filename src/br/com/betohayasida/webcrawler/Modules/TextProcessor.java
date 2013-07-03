@@ -11,8 +11,17 @@ import org.jsoup.select.Elements;
 import br.com.betohayasida.webcrawler.Store.HTMLPage;
 import br.com.betohayasida.webcrawler.Tools.URLQueue;
 
-public class TextProcessor {
-
+public class TextProcessor extends LogProducer {
+	
+	public TextProcessor(){
+		this.logger = new MyLogger("output-text_processor");
+	}
+	
+	public TextProcessor(MyLogger logger){
+		this.logger = logger;
+		this.debug = true;
+	}
+	
 	/**
 	 * Parses the HTML document using the jSoup library
 	 * @param file	HTMLPage object, containing the source code of the page.
@@ -20,6 +29,7 @@ public class TextProcessor {
 	 * @return A Document object, parsed by the jSoup library.
 	 */
 	public Document parse(HTMLPage file, String url){
+		log("parsing", "TextProcessor.parse");
 		return Jsoup.parse(file.html(), url);
 	}
 	
@@ -35,7 +45,7 @@ public class TextProcessor {
 		page.select("form").remove();
 		page.select("script").remove();
 
-		myWhitelist.addTags("div","p", "a", "b", "i", "br", "h1", "h2", "h3", "h4", "h5", "h6");
+		myWhitelist.addTags("p", "a", "b", "i", "br", "h1", "h2", "h3", "h4", "h5", "h6");
 		myWhitelist.addAttributes("a", "href");
 		
 		cleaned = Jsoup.clean(page.html(), myWhitelist);
@@ -58,13 +68,14 @@ public class TextProcessor {
 			Elements links = (Elements) doc.select("a[href]");
 			for(Element link : links){
 				if(!visited.contains(link.attr("abs:href")) && link.attr("abs:href").contains(domain)){
+					
 					if(!analyst.blackListed(link.text()) && !analyst.blackListed(link.attr("abs:href"))){
 						if( (analyst.relevantListed(link.text()) || analyst.relevantListed(link.attr("abs:href")))){
+							log("adding " + link.attr("abs:href"), "TextProcessor.addLinks");
 							queue.add(link.attr("abs:href"), Crawler.MaxIterations - iteration);
-						} else {
-							//queue.add(link.attr("abs:href"), Crawler.MaxIterations - 2 * iteration);
 						}
 					}
+					
 				}
 			}
 

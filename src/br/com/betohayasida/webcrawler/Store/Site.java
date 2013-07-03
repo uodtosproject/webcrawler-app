@@ -1,6 +1,5 @@
 package br.com.betohayasida.webcrawler.Store;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +7,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -103,15 +101,30 @@ public class Site extends SiteEntry {
 		this.url = url;
 		this.visitedOn = visitedOn;
 	}
+
+	/**
+	 * Constructor that fills the SiteEntry
+	 * @param name Name of the entry
+	 * @param url URL of the entry
+	 * @param visitedOn Epoch time of visit
+	 * @param domain Domain of the site
+	 */
+	public Site(String name, String url, String visitedOn, String domain){
+		this.name = name;
+		this.url = url;
+		this.visitedOn = visitedOn;
+		this.domain = domain;
+	}
 	
 	/**
 	 * Constructor that fills the SiteEntry for an Archive item
 	 * @param name Name of the entry
 	 * @param url URL of the entry
 	 * @param visitedOn Epoch time of visit
+	 * @param domain Domain of the site
 	 * @param archived Indicates if it's an archived entry
 	 */
-	public Site(String name, String url, String visitedOn, boolean archived){
+	public Site(String name, String url, String visitedOn, String domain, boolean archived){
 		this.name = name;
 		this.url = url;
 		this.visitedOn = visitedOn;
@@ -207,6 +220,7 @@ public class Site extends SiteEntry {
     		root.setAttribute("URL", this.url);
     		root.setAttribute("id", this.name);
     		root.setAttribute("visitedOn", this.visitedOn);
+    		root.setAttribute("domain", this.domain);
     		root.setAttribute("archived", (this.archive) ? "true" : "false");
     		doc.appendChild(root);
     		
@@ -234,15 +248,15 @@ public class Site extends SiteEntry {
 	    		
 			} catch (Exception e) {
 				//e.printStackTrace();
-			}
+			} 
     		
-		} catch (ParserConfigurationException e) {
+		} catch (Exception e) {
 			//e.printStackTrace();
 		}
 	}
 	
 	/**
-	 * Print the entry to XML
+	 * Print the entry to JSON
 	 * @param response HttpServletResponse object
 	 */
 	public void printToJSON(HttpServletResponse response){
@@ -253,10 +267,10 @@ public class Site extends SiteEntry {
 			PrintWriter writer = response.getWriter();
 			writer.write(gson.toJson(this));
 			writer.close();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
 	}
-
+	
 }

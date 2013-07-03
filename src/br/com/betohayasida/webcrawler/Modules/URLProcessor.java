@@ -1,6 +1,5 @@
 package br.com.betohayasida.webcrawler.Modules;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -13,8 +12,24 @@ import br.com.betohayasida.webcrawler.Tools.URLQueue;
 /**
  * Module responsible for handling URLs.
  */
-public class URLProcessor {
+public class URLProcessor extends LogProducer{
+  
+    public URLProcessor(){
+    	this.logger = new MyLogger("output-urlprocessor.txt");
+    }
     
+    public URLProcessor(MyLogger logger){
+    	this.logger = logger;
+    }
+    
+    /**
+     * Set Logger Object
+     * @param logger MyLogger object
+     */
+	public void setLogger(MyLogger logger){
+		this.logger = logger;
+	}
+	
 	/**
 	 * Creates an URL object. First, it canonicalizes the URL. 
 	 * @param sUrl String containing the URL
@@ -23,21 +38,27 @@ public class URLProcessor {
 	 */
 	public URL create(String sUrl, String domain, List<String> visited, URLQueue queue) throws InvalidURLException{
 		URL url = null;
-		HTTPModule httpMod = new HTTPModule();
+		HTTPModule httpMod = new HTTPModule(this.logger);
+		String method = "URLProcessor.create";
 		
 		// Get the canonical URL
 		String cUrl = this.canonical(sUrl);
-
+		log("Canonical URL: " + sUrl + " -> " + cUrl, method);
+		
 		// If it's a valid URL
 		if(cUrl != null){
+			log("Valid canonical URL", method);
 
 			// Check if it's in the same domain and if it's already been visited
-			if((cUrl.contains(domain) || cUrl.contains("google")) && !visited.contains(cUrl)){
-
+			if((cUrl.contains(domain) || (cUrl.contains("google.co") && domain.contains("google.co"))) && !visited.contains(cUrl)){
+				log("Domain checked and not visited yet", method);
+				
+				// Add URL to visited list
 				visited.add(cUrl);
 				
 				// Check if it's valid with UrlValidator
 				if(this.valid(cUrl)){
+					log("Valid URL", method);
 					
 					// Create URL object
 					try {
@@ -45,20 +66,26 @@ public class URLProcessor {
 						
 						// Check if it's valid with HTTPModule
 						url = httpMod.validate(url, queue);
-						if(url != null && !url.toString().equals(cUrl)){
-							visited.add(url.toString());
+						
+						if(url != null){
+							log("Valid URL (HTTPModule)", method);
+							
+							// If HTTPModule.validate set a new URL based on redirect
+							if(!url.toString().equals(cUrl)){
+								visited.add(url.toString());
+							}
 						}
+						
 					} catch (MalformedURLException e) {
-						System.out.println("Malformed URL");
-					} catch (IOException e) {
-						//e.printStackTrace();
+						log("MalFormed URL", method);
+					} catch (Exception e) {
+						log("ERROR: " + e.getMessage(), method);
 					}
 				}
 				
 			}
 			
 		}
-		
 		return url;
 	}
 	
@@ -77,7 +104,9 @@ public class URLProcessor {
 		if(strips.length >= 2){
 			url = strips[0];
 		}
-		
+		if(url.endsWith("/")){
+			url = url.substring(0, url.lastIndexOf("/"));
+		}
 		return url;
 	}
 	
@@ -108,7 +137,7 @@ public class URLProcessor {
 		
 			// Fix protocol
 			if(!(cURL.startsWith("http://") || cURL.startsWith("https://"))){
-				if(cURL.contains("twitter") || cURL.contains("facebook") || cURL.contains("foursquare")){
+				if(cURL.contains("twitter") || cURL.contains("facebook") || cURL.contains("foursquare") || cURL.contains("google")){
 					cURL = "https://".concat(cURL);
 				} else {
 					cURL = "http://".concat(cURL);

@@ -43,6 +43,7 @@ public class Archive {
 	    		siteElem.setAttribute("URL", site.getUrl());
 	    		siteElem.setAttribute("id", site.getName());
 	    		siteElem.setAttribute("visitedOn", site.getVisitedOn());
+	    		siteElem.setAttribute("domain", site.getDomain());
 	    		siteElem.setAttribute("archived", (site.isArchived()) ? "true" : "false");
 	    		root.appendChild(siteElem);
 	    		
@@ -78,7 +79,7 @@ public class Archive {
 	}
 	
 	/**
-	 * Print the entry to XML
+	 * Print the entry to JSON
 	 * @param response HttpServletResponse object
 	 */
 	public void printToJSON(HttpServletResponse response){
