@@ -50,4 +50,12 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
         <url-pattern>/resources/*</url-pattern>  
     </servlet-mapping>  
 
+  	<servlet>
+    	<servlet-name>Rest</servlet-name>
+    	<servlet-class>br.com.betohayasida.tos.controller.Rest</servlet-class>
+	</servlet>
+	<servlet-mapping>
+    	<servlet-name>Rest</servlet-name>
+    	<url-pattern>/crawl/*</url-pattern>
+  	</servlet-mapping>
 </web-app>

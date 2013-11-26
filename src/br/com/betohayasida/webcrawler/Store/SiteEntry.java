@@ -2,11 +2,17 @@ package br.com.betohayasida.webcrawler.Store;
 
 import java.util.Date;
 
+/**
+ * Class for storing Site Entries
+ * @author rkhayasidajunior
+ *
+ */
 public class SiteEntry {
 	protected String name = null;
 	protected String url = null;
 	protected String visitedOn = null;
 	protected String domain = null;
+	protected String ico = null;
 	
 	public String getName() {
 		return name;
@@ -40,5 +46,11 @@ public class SiteEntry {
 	}
 	public void setDomain(String domain){
 		this.domain = domain;
+	}
+	public String getIco(){
+		return this.ico == null? "" : this.ico;
+	}
+	public void setIco(String ico){
+		this.ico = ico;
 	}
 }

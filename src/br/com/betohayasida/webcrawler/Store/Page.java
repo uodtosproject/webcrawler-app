@@ -2,6 +2,11 @@ package br.com.betohayasida.webcrawler.Store;
 
 import java.util.Date;
 
+/**
+ * Class for storing pages
+ * @author rkhayasidajunior
+ *
+ */
 public class Page {
 	private String name = null;
 	private String parent = null;

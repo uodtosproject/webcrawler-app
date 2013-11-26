@@ -11,6 +11,11 @@ import org.jsoup.select.Elements;
 import br.com.betohayasida.webcrawler.Store.HTMLPage;
 import br.com.betohayasida.webcrawler.Tools.URLQueue;
 
+/**
+ * HTML parser
+ * @author rkhayasidajunior
+ *
+ */
 public class TextProcessor extends LogProducer {
 	
 	public TextProcessor(){
@@ -30,7 +35,43 @@ public class TextProcessor extends LogProducer {
 	 */
 	public Document parse(HTMLPage file, String url){
 		log("parsing", "TextProcessor.parse");
-		return Jsoup.parse(file.html(), url);
+		if(file.html().length() > 0) return Jsoup.parse(file.html(), url);
+		else return null;
+	}
+	
+	/**
+	 * Get the ICO URL
+	 * @param doc The HTML page as a Document object
+	 * @param url The URL of the page
+	 * @return A String containing the ICO URL or, if not found, a blank string. 
+	 */
+	public String getIco(Document doc, String url){
+		String ico = "";
+		
+		Elements links = doc.getElementsByAttributeValueContaining("rel", "shortcut");
+		if(links.size() > 0){
+			Element link = links.get(0);
+			ico = link.attr("href");
+			if(!ico.startsWith("http")){
+				if(!ico.startsWith("//")){
+					ico = url + ico;
+				} else {
+					ico = "http:" + ico;
+				}
+			}
+		} else {
+			links = doc.getElementsByAttributeValueContaining("rel", "icon");
+			Element link = links.get(0);
+			ico = link.attr("href");
+			if(!ico.startsWith("http")){
+				if(!ico.startsWith("//")){
+					ico = url + ico;
+				} else {
+					ico = "http:" + ico;
+				}
+			}
+		}
+		return ico;
 	}
 	
 	/**
@@ -44,9 +85,10 @@ public class TextProcessor extends LogProducer {
 		
 		page.select("form").remove();
 		page.select("script").remove();
+		page.select("a").remove();
 
-		myWhitelist.addTags("p", "a", "b", "i", "br", "h1", "h2", "h3", "h4", "h5", "h6");
-		myWhitelist.addAttributes("a", "href");
+		myWhitelist.addTags("p", "b", "i", "br", "h1", "h2", "h3", "h4", "h5", "h6");
+		//myWhitelist.addAttributes("a", "href");
 		
 		cleaned = Jsoup.clean(page.html(), myWhitelist);
 		cleaned = cleaned.replace("&nbsp;", " ");

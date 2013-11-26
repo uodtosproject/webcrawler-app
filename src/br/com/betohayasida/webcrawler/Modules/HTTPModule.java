@@ -124,6 +124,7 @@ public class HTTPModule extends LogProducer{
         String method = "HTTPModule.checkHeaders";
         
 		connection = (HttpURLConnection) url.openConnection();
+		connection.setReadTimeout(2000);
 		
 		if(connection != null){
 			log("opened connection", method);

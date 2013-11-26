@@ -5,6 +5,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+/**
+ * Logger
+ * @author rkhayasidajunior
+ *
+ */
 public class MyLogger {
 	private String method = "";
 	private boolean onFile = true;

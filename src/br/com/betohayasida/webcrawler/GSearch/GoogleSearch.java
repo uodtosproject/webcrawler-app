@@ -13,7 +13,10 @@ import br.com.betohayasida.webcrawler.Modules.Analyst;
 import br.com.betohayasida.webcrawler.Modules.LogProducer;
 import br.com.betohayasida.webcrawler.Modules.MyLogger;
 import br.com.betohayasida.webcrawler.Store.Link;
-
+/**
+ * Class for Google API search.
+ *
+ */
 public class GoogleSearch extends LogProducer{
 	
 	public GoogleSearch(){

@@ -14,6 +14,21 @@ public class Analyst extends LogProducer {
 	private List<String> relevantlist = null;
 	private List<String> blacklist = null;
 	
+	public Analyst(){
+		init();
+		this.logger = new MyLogger("output-analyst.txt");
+	}
+	
+	public Analyst(MyLogger logger){
+		init();
+		this.logger = logger;
+		this.debug = true;
+	}
+	
+	
+	/**
+	 * Initializes the lists.
+	 */
 	private void init(){
 		relevantlist = new ArrayList<String>();
 		relevantlist.add("account");
@@ -32,7 +47,15 @@ public class Analyst extends LogProducer {
 		relevantlist.add("terms of service");
 		relevantlist.add("tos");
 		relevantlist.add("user agreement");
-		
+		relevantlist.add("user rules");
+		relevantlist.add("subscriber");
+		relevantlist.add("acceptable use");
+		relevantlist.add("rule");
+		relevantlist.add("standards");
+		relevantlist.add("contract");
+		relevantlist.add("constitution");
+		relevantlist.add("law");
+				
 		blacklist = new ArrayList<String>();
 		blacklist.add("lang="); 
 		blacklist.add("RMNixonDeceased");
@@ -56,17 +79,6 @@ public class Analyst extends LogProducer {
 		blacklist.add("discussion");
 		blacklist.add("communit");
 		blacklist.add("ProfilePhoto");
-	}
-	
-	public Analyst(){
-		init();
-		this.logger = new MyLogger("output-analyst.txt");
-	}
-	
-	public Analyst(MyLogger logger){
-		init();
-		this.logger = logger;
-		this.debug = true;
 	}
 	
 	/**

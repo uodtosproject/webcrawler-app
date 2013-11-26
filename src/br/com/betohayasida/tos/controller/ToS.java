@@ -13,7 +13,11 @@ import br.com.betohayasida.webcrawler.Modules.Crawler;
 import br.com.betohayasida.webcrawler.Store.Archive;
 import br.com.betohayasida.webcrawler.Store.Site;
 
-// Extend HttpServlet class
+/**
+ * Controller for search tools
+ * @author rkhayasidajunior
+ *
+ */
 public class ToS extends HttpServlet {
 	private static final long serialVersionUID = -3682096299146791172L;
 	

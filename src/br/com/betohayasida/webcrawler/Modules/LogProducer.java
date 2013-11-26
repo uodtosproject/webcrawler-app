@@ -2,6 +2,11 @@ package br.com.betohayasida.webcrawler.Modules;
 
 import java.io.IOException;
 
+/**
+ * Logger
+ * @author rkhayasidajunior
+ *
+ */
 public class LogProducer {
 	public MyLogger logger = null;
 	protected boolean debug = false;

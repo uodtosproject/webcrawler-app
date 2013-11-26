@@ -1,6 +1,9 @@
 package br.com.betohayasida.webcrawler.GSearch;
 
-
+/**
+ * Java Bean for Results of the Google API
+ *
+ */
 public class GoogleResults {
 
     private ResponseData responseData;

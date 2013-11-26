@@ -5,7 +5,7 @@ import com.mongodb.BasicDBObject;
 
 
 /**
- * Module responsible for handling the connection with the DB.
+ * Module responsible for handling the connection with the DB, Archive collection
  */
 public class ArchiveStorage extends SiteStorage{
 	private String DBNAME = "crawler";
@@ -29,7 +29,8 @@ public class ArchiveStorage extends SiteStorage{
 			
 			BasicDBObject doc = new BasicDBObject("name", site.getName()).
 	                append("url", site.getUrl()).
-	                append("visitedOn", site.getVisitedOn());
+	                append("visitedOn", site.getVisitedOn()).
+	                append("ico", site.getIco());
 			
 			collection.insert(doc);
 

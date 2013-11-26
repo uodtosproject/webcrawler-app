@@ -21,7 +21,7 @@ public class Crawler extends LogProducer {
 	// Variables
 	//private static long oldInterval = 604800000;
 	private static long oldInterval = 5;
-	public static int MaxIterations = 80;
+	public static int MaxIterations = 180;
 	
 	// Modules
 	private HTTPModule httpMod = null;
@@ -30,16 +30,14 @@ public class Crawler extends LogProducer {
 	private Analyst analyst = null;
 	private TextProcessor textProcessor = null;
 	private GoogleSearch gSearch = null;
+	private IndexerSolr indexer = null;
 	
 	public Crawler(){
-		this.logger = new MyLogger("/Users/rkhayasidajunior/Dev/output.txt");
+		this.logger = new MyLogger("output.txt");
 		try {
 			this.logger.setOnFile(true);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		this.debug = true;
+		} catch (IOException e) {}
+		this.debug = false;
 
 		httpMod = new HTTPModule(logger);
 		httpMod.setDebug(debug);
@@ -53,6 +51,7 @@ public class Crawler extends LogProducer {
 		textProcessor.setDebug(debug);
 		gSearch = new GoogleSearch(logger);
 		gSearch.setDebug(debug);
+		indexer = new IndexerSolr();
 	}
 	
 	/**
@@ -149,6 +148,8 @@ public class Crawler extends LogProducer {
 				queue.add(gSearch.search("" + domain + " terms of use"), MaxIterations + 2);
 				queue.add(gSearch.search("" + domain + " terms of service"), MaxIterations + 2);
 				queue.add(gSearch.search("" + domain + " help"), MaxIterations + 2);
+				queue.add(gSearch.search("" + domain + " terms and coditions"), MaxIterations + 2);
+				queue.add(gSearch.search("" + domain + " privacy policy"), MaxIterations + 2);
 				queue.add(gSearch.search("" + domain + " faq"), MaxIterations + 2);
 				
 				// Add initial URL to the queue with the highest score
@@ -156,6 +157,7 @@ public class Crawler extends LogProducer {
 				
 				// BEGIN Crawl loop
 				int iteration = 0;
+				boolean firstPage = true;
 				while(!queue.empty() && (iteration < MaxIterations)){
 					log("\n------------------------------------", method);
 					
@@ -184,7 +186,16 @@ public class Crawler extends LogProducer {
 
 							// Parse page
 							Document doc = textProcessor.parse(file, url.toString());
-
+							if(firstPage){
+								String ico = textProcessor.getIco(doc, url.toString());
+								if(!ico.equals("")){
+									site.setIco(ico);
+									firstPage = false;
+								}
+							}
+							// Add links to the queue
+							textProcessor.addLinks(doc, visited, domain, url.toString(), iteration, queue);
+							
 							// BEGIN If it's a relevant page
 							if(analyst.relevantDocument(doc, url.toString())){
 								log("relevant doc, saving it", method);
@@ -207,9 +218,6 @@ public class Crawler extends LogProducer {
 							} else {
 								log("not a relevant doc", method);
 							} 
-
-							// Add links to the queue
-							textProcessor.addLinks(doc, visited, domain, url.toString(), iteration, queue);
 							
 							// END If it's a relevant page
 							
@@ -222,12 +230,13 @@ public class Crawler extends LogProducer {
 				} 
 				// END Crawl loop
 				// If no page has been saved yet
-				log("save site", method);
+				log("save site - " + String.valueOf(site.getPages().size()) + " pages", method);
 				if(site.getPages().size() > 0){
 					site.save();
 					for(Page p : site.getPages()){ 
 						log("saved entry: " + p.getUrl(), method);
 					}
+					indexer.index(site);
 				} 
 			} // END If there's no entry
 

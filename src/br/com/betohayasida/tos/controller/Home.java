@@ -7,7 +7,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+/**
+ * Controller for Home page
+ * @author rkhayasidajunior
+ *
+ */
 public class Home extends HttpServlet {
 	private static final long serialVersionUID = -3682096299146791172L;
 

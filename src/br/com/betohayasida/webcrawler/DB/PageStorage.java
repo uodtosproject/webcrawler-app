@@ -10,7 +10,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
 /**
- * Module responsible for handling the connection with the DB.
+ * Module responsible for handling the connection with the DB, Pages collection
  */
 public class PageStorage extends MongoBase {
 	private String DBNAME = "crawler";

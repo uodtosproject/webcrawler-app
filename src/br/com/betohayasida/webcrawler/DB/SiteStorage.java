@@ -11,7 +11,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
 /**
- * Module responsible for handling the connection with the DB.
+ * Module responsible for handling the connection with the DB, Sites collection
  */
 public class SiteStorage extends MongoBase {
 	private String DBNAME = "crawler";
@@ -30,7 +30,8 @@ public class SiteStorage extends MongoBase {
 			BasicDBObject doc = new BasicDBObject("name", site.getName()).
 	                append("url", site.getUrl()).
 	                append("domain", site.getDomain()).
-	                append("visitedOn", site.getVisitedOn());
+	                append("visitedOn", site.getVisitedOn()).
+            		append("ico", site.getIco());
 			
 			try {
 				if(cursor.hasNext()) {
@@ -76,6 +77,8 @@ public class SiteStorage extends MongoBase {
 					
 					site = new Site((String) result.get("name"), (String) result.get("url"), (String) result.get("visitedOn"), (String) result.get("domain"));
 					site.addPages(pageStorage.get(site.getName() + "|" + site.getVisitedOnMili()));
+					String ico = (String) result.get("ico");
+					site.setIco(ico == null ? "" : ico);
 					
 				}
 				
@@ -108,6 +111,8 @@ public class SiteStorage extends MongoBase {
 					
 					site = new Site((String) result.get("name"), (String) result.get("url"), (String) result.get("visitedOn"), (String) result.get("domain"));
 					site.addPages(pageStorage.get(site.getName() + "|" + site.getVisitedOnMili()));
+					String ico = (String) result.get("ico");
+					site.setIco(ico == null ? "" : ico);
 					
 				}
 				
@@ -141,6 +146,9 @@ public class SiteStorage extends MongoBase {
 					Site site = new Site((String) result.get("name"), (String) result.get("url"), (String) result.get("visitedOn"), (String) result.get("domain"));
 					site.addPages(pageStorage.get(site.getName() + "|" + site.getVisitedOnMili()));
 					sites.add(site);
+					String ico = (String) result.get("ico");
+					site.setIco(ico == null ? "" : ico);
+					
 				}
 				
 			} finally {
@@ -173,6 +181,8 @@ public class SiteStorage extends MongoBase {
 					Site site = new Site((String) result.get("name"), (String) result.get("url"), (String) result.get("visitedOn"), (String) result.get("domain"));
 					site.addPages(pageStorage.get(site.getName() + "|" + site.getVisitedOnMili()));
 					sites.add(site);
+					String ico = (String) result.get("ico");
+					site.setIco(ico == null ? "" : ico);
 				}
 				
 			} finally {
@@ -208,6 +218,8 @@ public class SiteStorage extends MongoBase {
 				site.setUrl((String) result.get("url"));
 				site.setVisitedOn((String) result.get("visitedOn"));
 				site.setDomain((String) result.get("domain"));
+				String ico = (String) result.get("ico");
+				site.setIco(ico == null ? "" : ico);
 				
 				results.add(site);
 				
@@ -224,5 +236,30 @@ public class SiteStorage extends MongoBase {
 	 */
 	public boolean connect(){
 		return super.connect(DBNAME, COLLECTIONNAME);
+	}
+	
+	public List<Site> getSites() {
+		List<Site> results = new ArrayList<Site>();
+		
+		if(this.connect()){
+			BasicDBObject sortPredicate = new BasicDBObject();
+			
+			DBCursor cursor = this.collection().find().sort(sortPredicate);
+	
+			while(cursor.hasNext()) {
+				DBObject result = cursor.next();
+				
+				Site site = new Site();
+				site.setName((String) result.get("name"));
+				site.setVisitedOn((String) result.get("visitedOn"));
+				site.setUrl((String) result.get("url"));
+				site.setDomain((String) ((result.get("domain")!=null) ? result.get("domain") : site.getUrl()));
+				results.add(site);
+				
+			}
+			this.close();
+		}
+		
+		return results;
 	}
 }

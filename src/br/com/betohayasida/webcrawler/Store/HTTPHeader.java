@@ -1,5 +1,10 @@
 package br.com.betohayasida.webcrawler.Store;
 
+/**
+ * Class for storing HTTP header responses
+ * @author rkhayasidajunior
+ *
+ */
 public class HTTPHeader {
 
 	private int code;

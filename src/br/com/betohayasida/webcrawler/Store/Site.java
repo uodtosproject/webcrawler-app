@@ -21,7 +21,11 @@ import com.google.gson.GsonBuilder;
 import br.com.betohayasida.webcrawler.DB.ArchiveStorage;
 import br.com.betohayasida.webcrawler.DB.SiteStorage;
 
-
+/**
+ * Class for storing Sites
+ * @author rkhayasidajunior
+ *
+ */
 public class Site extends SiteEntry {
 	private static SiteStorage siteStorage = new SiteStorage();
 	private static ArchiveStorage archiveStorage = new ArchiveStorage();
