@@ -1,0 +1,12 @@
+Crawler.crawl: set domain: twitter.com
+URLProcessor.create: Canonical URL: https://www.twitter.com -> https://twitter.com
+URLProcessor.create: Valid canonical URL
+URLProcessor.create: Domain checked and not visited yet
+URLProcessor.create: Valid URL
+HTTPModule.validate: robots.txt checked
+HTTPModule.checkHeaders: opened connection
+HTTPModule.checkHeaders: valid code 200
+HTTPModule.checkHeaders: null: [HTTP/1.1 200 OK] content-type: [text/html;charset=utf-8] x-frame-options: [SAMEORIGIN] last-modified: [Tue, 15 Oct 2013 18:57:32 GMT] status: [200 OK] ms: [A] x-ua-compatible: [IE=10,chrome=1] date: [Tue, 15 Oct 2013 18:57:32 GMT] x-transaction: [b9263f81a84d15df] pragma: [no-cache] cache-control: [no-cache, no-store, must-revalidate, pre-check=0, post-check=0] x-xss-protection: [1; mode=block] expires: [Tue, 31 Mar 1981 05:00:00 GMT] set-cookie: [guest_id=v1%3A138186345210638789; Domain=.twitter.com; Path=/; Expires=Thu, 15-Oct-2015 18:57:32 UTC, _twitter_sess=BAh7CSIKZmxhc2hJQzonQWN0aW9uQ29udHJvbGxlcjo6Rmxhc2g6OkZsYXNo%250ASGFzaHsABjoKQHVzZWR7ADoPY3JlYXRlZF9hdGwrCMvter1BAToMY3NyZl9p%250AZCIlYWZlYmM5NjkzNjExYjhkZTEwYWVlMmEyYTNlYmE1Y2E6B2lkIiUxYTQ1%250AYTE3Y2MzYWEzYjMxYzNjMjgzZWE1YWYxY2IwZg%253D%253D--90b8622f144fd9fd9b9f2919398c23a0af883650; Path=/; Domain=.twitter.com; Secure; HTTPOnly] content-length: [50684] server: [tfe] strict-transport-security: [max-age=631138519] 
+HTTPModule.validate: checking headers...
+URLProcessor.create: Valid URL (HTTPModule)
+Crawler.crawl: initial URL: https://www.twitter.com
