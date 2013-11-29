@@ -1,0 +1,3 @@
+#Project Description
+This project implements the crawler, as well as its web interface. The crawler core is located in the package Modules. The access to the database (MongoDB) is made through the classes within the DB package, and database entries are represented by the classes of the Store package. Tools, GSearch and Exception classes implement secondary features needed by the core. The Controller package contains the controllers for the web interface, and the .jsp files (View) are inside the WebContent folder. 
+
